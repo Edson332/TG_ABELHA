@@ -1,26 +1,68 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
-public class NPCPatrol : MonoBehaviour
+public class NPCCollector : MonoBehaviour
 {
-    public Transform targetPosition; // Defina o ponto de destino no Inspector
-    private Vector3 startPosition;
+    public Transform resourceTarget; // Objeto onde o NPC coletará o recurso
+    public Transform homeBase; // Ponto de origem, pode ser alterado dinamicamente
+    public float collectionTime = 2f; // Tempo para coletar o recurso
+
     private NavMeshAgent agent;
-    private bool goingToTarget = true;
+    private bool collecting = false;
+    private bool returningHome = false;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        startPosition = transform.position;
-        agent.SetDestination(targetPosition.position);
+        GoToResource();
     }
 
     void Update()
     {
-        if (agent.remainingDistance <= agent.stoppingDistance && !agent.pathPending)
+        if (!collecting && !returningHome && agent.remainingDistance <= agent.stoppingDistance && !agent.pathPending)
         {
-            goingToTarget = !goingToTarget;
-            agent.SetDestination(goingToTarget ? targetPosition.position : startPosition);
+            StartCoroutine(CollectResource());
         }
+        else if (returningHome && agent.remainingDistance <= agent.stoppingDistance && !agent.pathPending)
+        {
+            returningHome = false;
+            GoToResource(); // Após chegar em casa, voltar a coletar
+        }
+    }
+
+    void GoToResource()
+    {
+        if (resourceTarget != null)
+        {
+            agent.SetDestination(resourceTarget.position);
+        }
+    }
+
+    IEnumerator CollectResource()
+    {
+        collecting = true;
+        yield return new WaitForSeconds(collectionTime); // Simula o tempo de coleta
+        collecting = false;
+        ReturnHome();
+    }
+
+    void ReturnHome()
+    {
+        if (homeBase != null)
+        {
+            returningHome = true;
+            agent.SetDestination(homeBase.position);
+        }
+    }
+
+    public void SetNewHomeBase(Transform newHome)
+    {
+        homeBase = newHome;
+    }
+
+    public void SetNewResourceTarget(Transform newTarget)
+    {
+        resourceTarget = newTarget;
     }
 }
