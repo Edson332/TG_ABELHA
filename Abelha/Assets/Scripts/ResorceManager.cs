@@ -5,8 +5,11 @@ public class ResourceManager : MonoBehaviour
     public static ResourceManager Instance;
 
     public int nectar = 0;
-    public int carriedHoney = 0;  // Mel sendo carregado pelas abelhas
-    public int storedHoney = 0;   // Mel depositado e disponível para upgrades
+    public int carriedHoney = 0;
+    public int storedHoney = 0;
+
+    public int honeyPerCycle = 1;  // Padrão: 1 mel por ciclo
+    public int beeCarryLimit = 10; // Padrão: 10 mel carregado por vez
 
     void Awake()
     {
@@ -21,12 +24,12 @@ public class ResourceManager : MonoBehaviour
         nectar += amount;
     }
 
-    public void ConvertNectarToHoney(int amount)
+    public void ConvertNectarToHoney()
     {
-        if (nectar >= amount)
+        if (nectar >= honeyPerCycle)
         {
-            nectar -= amount;
-            carriedHoney += amount;
+            nectar -= honeyPerCycle;
+            carriedHoney += honeyPerCycle;
         }
     }
 
@@ -37,5 +40,15 @@ public class ResourceManager : MonoBehaviour
             carriedHoney -= amount;
             storedHoney += amount;
         }
+    }
+
+    public void UpgradeHoneyProduction(int extraAmount)
+    {
+        honeyPerCycle += extraAmount;
+    }
+
+    public void UpgradeCarryLimit(int extraLimit)
+    {
+        beeCarryLimit += extraLimit;
     }
 }
