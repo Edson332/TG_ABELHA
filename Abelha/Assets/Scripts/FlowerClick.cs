@@ -6,8 +6,12 @@ public class FlowerClick : MonoBehaviour
 
     void OnMouseDown()
     {
-        ResourceManager.Instance.AddNectar(nectarPerClick);
-        Debug.Log("Néctar coletado!");
-        // Aqui podemos adicionar efeitos visuais ou sonoros
+        if (GerenciadorRecursos.Instancia != null)
+        {
+            GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, nectarPerClick);
+            Debug.Log("Néctar coletado!");
+            // Aqui você pode adicionar efeitos visuais ou sonoros
+        }
     }
 }
+

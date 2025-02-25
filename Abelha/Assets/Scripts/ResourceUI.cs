@@ -7,11 +7,11 @@ public class ResourceUI : MonoBehaviour
 
     void Update()
     {
-        if (resourceText != null && ResourceManager.Instance != null)
+        if (resourceText != null && GerenciadorRecursos.Instancia != null)
         {
-            resourceText.text = $"Néctar: {ResourceManager.Instance.nectar}\n" +
-                                $"Mel Carregado: {ResourceManager.Instance.carriedHoney}\n" +
-                                $"Mel Armazenado: {ResourceManager.Instance.storedHoney}";
+            resourceText.text = $"Néctar: {GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Nectar)}\n" +
+                                $"Mel Processado: {GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.MelProcessado)}\n" +
+                                $"Mel: {GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Mel)}";
         }
     }
 }
