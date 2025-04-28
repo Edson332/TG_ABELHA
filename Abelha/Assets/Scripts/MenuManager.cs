@@ -7,7 +7,7 @@ public class MenuManager : MonoBehaviour
 {
     [Header("Panels")]
     public GameObject mainMenuPanel;
-    
+    public GameObject upgradeMenuPanel;
     [Header("Dependencies")]
     public AchievementManager achievementManager; // Must be assigned in Inspector
     public GameObject[] achievementPanels;
@@ -109,6 +109,20 @@ public class MenuManager : MonoBehaviour
             panel.SetActive(false);
         }
     }
+
+       public void ShowUpgradeMenu()
+    {
+        if (upgradeMenuPanel.activeSelf)
+        {
+            upgradeMenuPanel.SetActive(false);
+        } else
+        {
+            upgradeMenuPanel.SetActive(true);
+        }
+        
+
+    }
+
 
     public void UpdateAchievementDisplay(int panelIndex)
     {
