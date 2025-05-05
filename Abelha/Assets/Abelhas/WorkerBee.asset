@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd3c33ac872631c488f6f8e96eec822e, type: 3}
+  m_Name: WorkerBee
+  m_EditorClassIdentifier: 
+  beeTypeName: WorkerBee
+  nivelNectarColetado: 3
+  nivelMelProduzido: 0
+  nivelVelocidade: 3
+  custoBaseNectar: 2
+  fatorCustoNectar: 1.5
+  bonusNectarPorNivel: 0.1
+  custoBaseProducao: 2
+  fatorCustoProducao: 1.6
+  bonusProducaoPorNivel: 0.1
+  custoBaseVelocidade: 2
+  fatorCustoVelocidade: 1.7
+  bonusVelocidadePorNivel: 0.5

@@ -8,6 +8,10 @@ public class MenuManager : MonoBehaviour
     [Header("Panels")]
     public GameObject mainMenuPanel;
     public GameObject upgradeMenuPanel;
+
+    public GameObject upgradeTAB;
+
+    public GameObject buyTAB;
     [Header("Dependencies")]
     public AchievementManager achievementManager; // Must be assigned in Inspector
     public GameObject[] achievementPanels;
@@ -122,6 +126,34 @@ public class MenuManager : MonoBehaviour
         
 
     }
+
+
+           public void ShowUpgradeTAB()
+        {
+            if (upgradeTAB.activeSelf)
+            {
+                upgradeTAB.SetActive(false);
+            } else
+            {
+                upgradeTAB.SetActive(true);
+                buyTAB.SetActive(false);
+            }
+        
+        }
+
+
+        public void ShowBuyTAB()
+        {
+            if (buyTAB.activeSelf)
+            {
+                buyTAB.SetActive(false);
+            } else
+            {
+                buyTAB.SetActive(true);
+                upgradeTAB.SetActive(false);
+            }
+        
+        }
 
 
     public void UpdateAchievementDisplay(int panelIndex)

@@ -2,99 +2,161 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class ProducerBee : MonoBehaviour
+[RequireComponent(typeof(NavMeshAgent))]
+public class ProducerBee : MonoBehaviour, BeeStatsUpdater
 {
+    [Header("Identificação")]
+    // !! IMPORTANTE: Este nome DEVE CORRESPONDER ao beeTypeName no BeeUpgradeData asset !!
+    public string beeTypeName = "ProducerBee";
+
     [Header("Locais de Destino")]
-    public Transform flower;     // Usado para coletar nectar se necessário
-    public Transform honeycomb;  // Local de processamento do nectar em mel processado
-    public Transform hive;       // Local de depósito do mel final
+    public Transform flower;
+    public Transform honeycomb;
+    public Transform hive;
 
-    [Header("Parâmetros de Tempo")]
-    public float productionTime = 2f;   // Tempo para processar o nectar no honeycomb
-    public float depositTime = 2f;      // Tempo para depositar o mel na colmeia
-    public float collectionTime = 2f;   // Tempo para coletar nectar na flor (se necessário)
-
-    [Header("Capacidade de Produção")]
-    public float productionAmount = 1f; // Quantidade de nectar processada por ciclo
+    [Header("Parâmetros Base (Antes dos Upgrades)")]
+    public float baseProductionTime = 2f;
+    public float baseDepositTime = 2f;
+    public float baseCollectionTime = 2f;
+    public float baseProductionAmount = 1f; // Quanto Nectar ela tenta processar por ciclo
+    public float baseSpeed = 3.0f;
 
     [Header("Configuração Adicional")]
-    public float initialDelay = 0f;           // Atraso inicial para diferenciar o ciclo
-    public float destinationOffsetRadius = 1f;  // Raio para posicionamento aleatório próximo aos destinos
+    public float initialDelay = 0f;
+    public float destinationOffsetRadius = 1f;
 
     private NavMeshAgent agent;
+    private float _effectiveProductionAmount;
+
+     private void Awake()
+    {
+        agent = GetComponent<NavMeshAgent>();
+    }
 
     private void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        // Ajusta a prioridade de evitação para minimizar colisões com WorkerBees
+         if (string.IsNullOrEmpty(beeTypeName)) {
+            Debug.LogError($"Abelha {gameObject.name} não tem um beeTypeName definido!");
+            this.enabled = false;
+            return;
+        }
         agent.avoidancePriority = Random.Range(0, 100);
         StartCoroutine(StartProducer());
     }
 
+     // Registro e Desregistro (Igual WorkerBee)
+    private void OnEnable()
+    {
+        if (GerenciadorUpgrades.Instancia != null && !string.IsNullOrEmpty(beeTypeName))
+        {
+            GerenciadorUpgrades.Instancia.RegistrarAbelha(this, beeTypeName);
+        } else if (GerenciadorUpgrades.Instancia == null) {
+            Debug.LogWarning($"GerenciadorUpgrades não encontrado ao habilitar {beeTypeName} {gameObject.name}.");
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (GerenciadorUpgrades.Instancia != null && !string.IsNullOrEmpty(beeTypeName))
+        {
+            GerenciadorUpgrades.Instancia.DesregistrarAbelha(this, beeTypeName);
+        }
+    }
+
+    // Método da interface
+    public void AtualizarVelocidade(float multiplicador)
+    {
+        if (agent == null) agent = GetComponent<NavMeshAgent>();
+        agent.speed = baseSpeed * multiplicador;
+    }
+
     private IEnumerator StartProducer()
     {
-        if (initialDelay > 0f)
-            yield return new WaitForSeconds(initialDelay);
-        yield return StartCoroutine(ProducerRoutine());
+        if (initialDelay > 0f) yield return new WaitForSeconds(initialDelay);
+        yield return null; // Espera registro
+         if (agent != null && agent.isOnNavMesh) {
+            StartCoroutine(ProducerRoutine());
+        } else {
+             Debug.LogError($"ProducerBee {gameObject.name} ({beeTypeName}) não pôde iniciar rotina. Agent: {agent}, IsOnNavMesh: {agent?.isOnNavMesh}");
+        }
     }
 
     private IEnumerator ProducerRoutine()
     {
+        // Pega os multiplicadores no início
+        float productionMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.MelProduzido);
+        float nectarMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.NectarColetado); // Para coleta opcional
+
         while (true)
         {
-            // 1. Verifica se há nectar disponível na reserva global para produção
-            float availableNectar = GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Nectar);
-            if (availableNectar >= productionAmount)
-            {
-                // Vai até o honeycomb para processar o nectar
-                yield return StartCoroutine(MoveToTarget(GetRandomDestination(honeycomb.position)));
-                Debug.Log("ProducerBee: Processando nectar em mel processado...");
-                yield return new WaitForSeconds(productionTime);
-                // Processa o nectar: remove do recurso global e adiciona mel processado
-                GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Nectar, productionAmount);
-                GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.MelProcessado, productionAmount);
+             // Quanto ela TENTA processar (base, não afetado por upgrades de coleta aqui)
+            _effectiveProductionAmount = baseProductionAmount;
 
-                // Vai até a colmeia para depositar o mel processado
-                yield return StartCoroutine(MoveToTarget(GetRandomDestination(hive.position)));
-                Debug.Log("ProducerBee: Depositando mel na colmeia...");
-                yield return new WaitForSeconds(depositTime);
-                GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.MelProcessado, productionAmount);
-                GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, productionAmount);
-            }
-            else
+            // 1. Verifica estoque e tenta pegar Nectar
+            if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Nectar) >= _effectiveProductionAmount)
             {
-                // Se não houver nectar suficiente, vai até a flor para coletar nectar.
-                // Isso ocorre somente se a reserva global estiver abaixo do necessário,
-                // garantindo que não roube nectar das WorkerBees.
-                yield return StartCoroutine(MoveToTarget(GetRandomDestination(flower.position)));
-                Debug.Log("ProducerBee: Coletando nectar (reserva insuficiente)...");
-                yield return new WaitForSeconds(collectionTime);
-                // Antes de coletar, verifica novamente se o recurso continua insuficiente
-                availableNectar = GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Nectar);
-                if (availableNectar < productionAmount)
+                if (GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Nectar, _effectiveProductionAmount))
                 {
-                    GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, productionAmount);
+                    // Conseguiu pegar Nectar, processa
+                    yield return StartCoroutine(MoveToTarget(GetRandomDestination(honeycomb.position)));
+                    yield return new WaitForSeconds(baseProductionTime);
+                    GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.MelProcessado, _effectiveProductionAmount);
+
+                    // 2. Deposita Mel
+                    yield return StartCoroutine(MoveToTarget(GetRandomDestination(hive.position)));
+                    yield return new WaitForSeconds(baseDepositTime);
+                    float melFinalAmount = _effectiveProductionAmount * productionMultiplier; // Aplica bônus
+                    if(GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.MelProcessado, _effectiveProductionAmount))
+                    {
+                        GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
+                    } else {
+                        //Debug.LogWarning($"{beeTypeName} {gameObject.name}: Mel Processado sumiu. Devolvendo Nectar.");
+                        GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, _effectiveProductionAmount);
+                        yield return new WaitForSeconds(1f); continue;
+                    }
+                }
+                else
+                {
+                    //Debug.Log($"{beeTypeName} {gameObject.name}: Nectar sumiu antes de pegar. Tentando de novo...");
+                    yield return new WaitForSeconds(0.5f); continue;
                 }
             }
+            else // Falta Nectar no estoque
+            {
+                //Debug.Log($"{beeTypeName} {gameObject.name}: Nectar insuficiente. Indo coletar...");
+                yield return StartCoroutine(MoveToTarget(GetRandomDestination(flower.position)));
+                yield return new WaitForSeconds(baseCollectionTime);
+                // Coleta com bônus de coleta DESTE TIPO de abelha
+                float nectarColetado = baseProductionAmount * nectarMultiplier;
+                GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, nectarColetado);
+                yield return new WaitForSeconds(0.5f); continue;
+            }
 
-            // Pequena pausa antes de iniciar o próximo ciclo
-            yield return new WaitForSeconds(1f);
+             // Pega multiplicadores novamente para o próximo ciclo
+             productionMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.MelProduzido);
+             nectarMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.NectarColetado);
+
+            yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
         }
     }
 
-    // Gera um destino aleatório próximo à posição base para evitar que várias abelhas se sobreponham
+    // Funções GetRandomDestination e MoveToTarget (sem alterações)
     private Vector3 GetRandomDestination(Vector3 basePosition)
     {
         Vector2 randomOffset = Random.insideUnitCircle * destinationOffsetRadius;
-        return basePosition + new Vector3(randomOffset.x, 0, randomOffset.y);
+        Vector3 targetPos = basePosition + new Vector3(randomOffset.x, 0, randomOffset.y);
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(targetPos, out hit, destinationOffsetRadius * 2, NavMesh.AllAreas)) { return hit.position; }
+        return basePosition;
     }
 
-    // Move a abelha até o destino usando o NavMeshAgent
-    private IEnumerator MoveToTarget(Vector3 targetPosition)
+     private IEnumerator MoveToTarget(Vector3 targetPosition)
     {
+        if (!agent.isOnNavMesh) { yield break; }
         agent.SetDestination(targetPosition);
-        while (agent.pathPending || agent.remainingDistance > agent.stoppingDistance)
+        while (agent.pathPending || (agent.hasPath && agent.remainingDistance > agent.stoppingDistance))
         {
+            if (!agent.hasPath && agent.pathStatus != NavMeshPathStatus.PathComplete) { yield break; }
             yield return null;
         }
     }
