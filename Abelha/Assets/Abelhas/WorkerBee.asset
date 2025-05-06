@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WorkerBee
   m_EditorClassIdentifier: 
   beeTypeName: WorkerBee
-  nivelNectarColetado: 3
+  nivelNectarColetado: 0
   nivelMelProduzido: 0
-  nivelVelocidade: 3
+  nivelVelocidade: 0
   custoBaseNectar: 2
   fatorCustoNectar: 1.5
   bonusNectarPorNivel: 0.1
