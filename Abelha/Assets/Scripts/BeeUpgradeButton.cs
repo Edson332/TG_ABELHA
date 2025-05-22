@@ -26,4 +26,13 @@ public class BeeUpgradeButton : MonoBehaviour
             // Feedback de erro
         }
     }
+
+    public void OnQueenBeeUpgradeButtonClicked()
+    {
+        bool comprou = BeeManager.Instancia.TrySpawnBee("QueenBee");
+        if (!comprou)
+        {
+            // Feedback de erro
+        }
+    }
 }
