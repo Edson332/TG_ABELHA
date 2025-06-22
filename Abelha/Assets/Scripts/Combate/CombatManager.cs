@@ -24,6 +24,10 @@ public class CombatManager : MonoBehaviour
     public Transform worldSpaceCanvasTransform; // O Canvas configurado como World Space
     public GameObject healthBarPrefab; // O Prefab do seu Slider (HealthBar_Element)
 
+    [Header("Dados dos Combatentes do Jogador")]
+    [Tooltip("Lista de TODOS os tipos de abelhas do jogador que podem participar de combates. Arraste os PlayerBeeCombatDataSO aqui.")]
+    public List<PlayerBeeCombatDataSO> allPlayerBeeCombatData;
+
     [Header("Pontos de Spawn na Arena")]
     public List<Transform> playerSpawnPoints = new List<Transform>();
     public List<Transform> enemySpawnPoints = new List<Transform>();
@@ -68,7 +72,7 @@ public class CombatManager : MonoBehaviour
         if (mainGameCamera != null) mainGameCamera.gameObject.SetActive(true);
 
         // Descomente a linha abaixo para iniciar um combate de teste automaticamente ao rodar o jogo
-         Test_StartCombatWithInspectorData();
+         //Test_StartCombatWithInspectorData();
     }
 
     // Método de utilidade para iniciar um combate de teste via Inspector ou outro script
@@ -375,19 +379,32 @@ public class CombatManager : MonoBehaviour
         foreach (var combatant in _enemyCombatants) { if (combatant != null && combatant.gameObject != null) Destroy(combatant.gameObject); }
         _enemyCombatants.Clear();
     }
-    
+
     private IEnumerator ConcludeCombatSequence()
     {
         currentCombatState = CombatState.Resolving; // Marcar que está resolvendo
         yield return new WaitForSeconds(postCombatUIDelay); // Tempo para o jogador ver o resultado
 
-        ClearPreviousCombatants(); 
+        ClearPreviousCombatants();
 
         if (combatCamera != null) combatCamera.gameObject.SetActive(false);
         if (mainGameCamera != null) mainGameCamera.gameObject.SetActive(true);
-        
+
         currentCombatState = CombatState.Finished; // Combate realmente finalizado
         Debug.Log("Sequência de conclusão de combate finalizada. Retornando ao jogo principal.");
-        // TODO: Mostrar UI de resultado de batalha e botão para voltar ao jogo principal/fechar UI de combate.
+         if (InvasionScheduler.Instancia != null)
+    {
+        // Notifica o agendador que o ciclo de invasão terminou e ele pode agendar o próximo.
+        InvasionScheduler.Instancia.AlertDecisionMade();
+        Debug.Log("InvasionScheduler reativado.");
+    }
+    else
+    {
+        Debug.LogWarning("InvasionScheduler não encontrado para reativar o agendamento.");
+    }
+    // ----------------------------------------------------------------
+
+    
+    // TODO: Mostrar UI de resultado de batalha e botão para voltar ao jogo principal/fechar UI de combate.
     }
 }

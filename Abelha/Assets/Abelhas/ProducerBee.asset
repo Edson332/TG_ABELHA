@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   beeTypeName: ProducerBee
   nivelNectarColetado: 0
-  nivelMelProduzido: 1
-  nivelVelocidade: 1
+  nivelMelProduzido: 4
+  nivelVelocidade: 3
   custoBaseNectar: 5
   fatorCustoNectar: 1.5
   bonusNectarPorNivel: 0.1
