@@ -7,7 +7,9 @@ public enum TipoUpgrade
 {
     NectarColetado,
     MelProduzido,
-    VelocidadeMovimento
+    VelocidadeMovimento,
+    VidaCombate,      // --- ADICIONADO ---
+    AtaqueCombate 
 }
 
 public class GerenciadorUpgrades : MonoBehaviour
@@ -60,6 +62,19 @@ public class GerenciadorUpgrades : MonoBehaviour
         }
     }
 
+     public void ResetAllUpgradeData()
+    {
+        if (todosTiposUpgradeData == null) return;
+
+        foreach (var upgradeDataSO in todosTiposUpgradeData)
+        {
+            if (upgradeDataSO != null)
+            {
+                upgradeDataSO.ResetLevels();
+            }
+        }
+        Debug.Log("Todos os dados de upgrade em memória foram resetados para o padrão.");
+    }
     // --- Funções Públicas para obter dados e comprar upgrades ---
 
     // Encontra os dados do tipo de abelha especificado
@@ -67,9 +82,10 @@ public class GerenciadorUpgrades : MonoBehaviour
     {
         BeeUpgradeData data;
         _upgradeDataMap.TryGetValue(beeType, out data);
-         if(data == null) {
-             Debug.LogError($"Dados de upgrade não encontrados para o tipo: {beeType}. Verifique o nome e se o Asset foi adicionado ao GerenciadorUpgrades.");
-         }
+        if (data == null)
+        {
+            Debug.LogError($"Dados de upgrade não encontrados para o tipo: {beeType}. Verifique o nome e se o Asset foi adicionado ao GerenciadorUpgrades.");
+        }
         return data;
     }
 
@@ -95,6 +111,8 @@ public class GerenciadorUpgrades : MonoBehaviour
             case TipoUpgrade.NectarColetado: return data.nivelNectarColetado;
             case TipoUpgrade.MelProduzido: return data.nivelMelProduzido;
             case TipoUpgrade.VelocidadeMovimento: return data.nivelVelocidade;
+            case TipoUpgrade.VidaCombate: return data.nivelVidaCombate;
+            case TipoUpgrade.AtaqueCombate: return data.nivelAtaqueCombate;
             default: return 0;
         }
     }
@@ -156,6 +174,30 @@ public class GerenciadorUpgrades : MonoBehaviour
              }
         }
     }
+    
+    public void LoadAllUpgradeLevels(List<BeeUpgradeSaveData> savedLevels)
+    {
+        if (savedLevels == null) return;
+
+        foreach (var savedData in savedLevels)
+        {
+            // Encontra o ScriptableObject correspondente na lista do gerenciador
+            var upgradeDataSO = todosTiposUpgradeData.Find(so => so.beeTypeName == savedData.beeTypeName);
+            if (upgradeDataSO != null)
+            {
+                upgradeDataSO.nivelNectarColetado = savedData.nectarLevel;
+                upgradeDataSO.nivelMelProduzido = savedData.productionLevel;
+                upgradeDataSO.nivelVelocidade = savedData.speedLevel;
+                upgradeDataSO.nivelVidaCombate = savedData.combatHealthLevel;   // --- ADICIONADO ---
+                upgradeDataSO.nivelAtaqueCombate = savedData.combatAttackLevel;
+            }
+            else
+            {
+                Debug.LogWarning($"Não foi possível encontrar BeeUpgradeDataSO para carregar níveis do tipo: {savedData.beeTypeName}");
+            }
+        }
+        Debug.Log("Níveis de upgrade carregados para todos os tipos de abelha.");
+    }
 
     // --- Notificação de Velocidade (por tipo) ---
     private void NotificarAtualizacaoVelocidade(string beeType)
@@ -165,7 +207,7 @@ public class GerenciadorUpgrades : MonoBehaviour
             float novoMultiplicador = GetMultiplier(beeType, TipoUpgrade.VelocidadeMovimento);
             List<BeeStatsUpdater> abelhasDoTipo = _abelhasAtivasPorTipo[beeType];
 
-             Debug.Log($"Notificando {abelhasDoTipo.Count} abelhas do tipo {beeType} sobre atualização de velocidade (Multiplicador: {novoMultiplicador:F2}).");
+            Debug.Log($"Notificando {abelhasDoTipo.Count} abelhas do tipo {beeType} sobre atualização de velocidade (Multiplicador: {novoMultiplicador:F2}).");
 
             // Itera de trás para frente para segurança ao remover (embora não removamos aqui)
             for (int i = abelhasDoTipo.Count - 1; i >= 0; i--)
@@ -176,8 +218,8 @@ public class GerenciadorUpgrades : MonoBehaviour
                 }
                 else
                 {
-                     // Remove referências nulas se necessário (melhor fazer no Desregistrar)
-                     // abelhasDoTipo.RemoveAt(i); // Cuidado ao modificar lista durante iteração
+                    // Remove referências nulas se necessário (melhor fazer no Desregistrar)
+                    // abelhasDoTipo.RemoveAt(i); // Cuidado ao modificar lista durante iteração
                 }
             }
         }

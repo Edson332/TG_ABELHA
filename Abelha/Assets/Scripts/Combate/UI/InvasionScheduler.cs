@@ -7,38 +7,30 @@ public class InvasionScheduler : MonoBehaviour
     public static InvasionScheduler Instancia { get; private set; }
 
     [Header("Configurações de Invasão")]
-    public List<EnemyWaveSO> possibleInvasionWaves; // Arraste seus EnemyWaveSO aqui
-    public float minTimeBetweenInvasions = 120f; // 2 minutos
-    public float maxTimeBetweenInvasions = 300f; // 5 minutos
-    public float initialDelay = 60f; // Atraso para a primeira invasão
+    public List<EnemyWaveSO> possibleInvasionWaves;
+    public float minTimeBetweenInvasions = 120f;
+    public float maxTimeBetweenInvasions = 300f;
+    public float initialDelay = 60f;
 
     [Header("Referências da UI")]
-    public CombatAlertUI combatAlertUI; // Arraste o GameObject com o script CombatAlertUI
+    public CombatAlertUI combatAlertUI;
+
+    // O campo de referência do tutorial foi REMOVIDO daqui
 
     private float _invasionTimer;
     private bool _schedulerActive = true;
 
     void Awake()
     {
-        if (Instancia != null && Instancia != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
         Instancia = this;
     }
 
     void Start()
     {
-        if (combatAlertUI == null)
+        if (combatAlertUI == null || possibleInvasionWaves == null || possibleInvasionWaves.Count == 0)
         {
-            Debug.LogError("CombatAlertUI não atribuído ao InvasionScheduler!");
-            _schedulerActive = false;
-            return;
-        }
-        if (possibleInvasionWaves == null || possibleInvasionWaves.Count == 0)
-        {
-            Debug.LogError("Nenhuma EnemyWaveSO atribuída ao InvasionScheduler!");
+            Debug.LogError("Configuração incompleta no InvasionScheduler! Desativando...");
             _schedulerActive = false;
             return;
         }
@@ -49,8 +41,6 @@ public class InvasionScheduler : MonoBehaviour
     {
         if (!_schedulerActive || CombatManager.Instancia == null || CombatManager.Instancia.isCombatActive)
         {
-            // Não agenda novas invasões se o scheduler estiver inativo,
-            // o CombatManager não existir, ou se um combate já estiver ativo.
             return;
         }
 
@@ -58,20 +48,17 @@ public class InvasionScheduler : MonoBehaviour
         if (_invasionTimer <= 0)
         {
             TriggerInvasion();
-            ResetTimer();
         }
     }
 
     void TriggerInvasion()
     {
-        if (possibleInvasionWaves.Count > 0)
-        {
-            int randomIndex = Random.Range(0, possibleInvasionWaves.Count);
-            EnemyWaveSO selectedWave = possibleInvasionWaves[randomIndex];
-            Debug.Log($"Agendador: Disparando invasão com a onda '{selectedWave.waveName}'");
-            combatAlertUI.ShowAlert(selectedWave);
-            _schedulerActive = false; // Para de agendar até que o alerta seja resolvido
-        }
+        _schedulerActive = false; // Pausa o agendador para lidar com este evento
+
+        int randomIndex = Random.Range(0, possibleInvasionWaves.Count);
+        EnemyWaveSO selectedWave = possibleInvasionWaves[randomIndex];
+        Debug.Log($"Agendador: Mostrando alerta de combate para a onda '{selectedWave.waveName}'");
+        combatAlertUI.ShowAlert(selectedWave);
     }
 
     public void ResetTimer()
@@ -80,12 +67,9 @@ public class InvasionScheduler : MonoBehaviour
         Debug.Log($"Próxima checagem de invasão em {_invasionTimer:F0} segundos.");
     }
 
-    /// <summary>
-    /// Chamado pela UI quando o jogador toma uma decisão sobre o alerta (aceita ou ignora).
-    /// </summary>
     public void AlertDecisionMade()
     {
-        _schedulerActive = true; // Permite que o scheduler continue após a decisão
-        ResetTimer(); // Reseta o timer para a próxima invasão
+        _schedulerActive = true;
+        ResetTimer();
     }
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   beeTypeName: WorkerBee
   nivelNectarColetado: 0
   nivelMelProduzido: 0
-  nivelVelocidade: 5
+  nivelVelocidade: 0
   custoBaseNectar: 2
   fatorCustoNectar: 1.5
   bonusNectarPorNivel: 0.1

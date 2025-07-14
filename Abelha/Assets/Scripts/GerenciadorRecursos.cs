@@ -11,6 +11,12 @@ public enum TipoRecurso
 
 public class GerenciadorRecursos : MonoBehaviour
 {
+
+    [Header("Gatilhos de Tutorial")]
+    [Tooltip("Tutorial a ser exibido na primeira vez que o jogador coleta Mel.")]
+    public TutorialStepSO primeiroMelTutorial;
+
+    private bool _primeiroMelTutorialDisparado = false;
     // Instância única para acesso global
     public static GerenciadorRecursos Instancia { get; private set; }
 
@@ -58,12 +64,31 @@ public class GerenciadorRecursos : MonoBehaviour
         {
             recursos.Add(tipo, valor);
         }
+
+            if (tipo == TipoRecurso.Mel && !_primeiroMelTutorialDisparado)
+    {
+        if (recursos[tipo] > 0) // Ou uma condição mais específica como >= 1
+        {
+            if (TutorialManager.Instancia != null)
+            {
+                TutorialManager.Instancia.RequestTutorial(primeiroMelTutorial);
+            }
+            _primeiroMelTutorialDisparado = true; // Garante que esta verificação só ocorra uma vez
+        }
+    }
     }
 
-    /// <summary>
-    /// Remove uma quantidade do recurso especificado se houver saldo suficiente.
-    /// Retorna true se a operação foi realizada; caso contrário, false.
-    /// </summary>
+public void ResetRecursos()
+    {
+        // Cria uma lista de chaves para evitar modificar o dicionário enquanto itera
+        List<TipoRecurso> keys = new List<TipoRecurso>(recursos.Keys);
+        foreach (var key in keys)
+        {
+            recursos[key] = 0;
+        }
+        Debug.Log("Todos os recursos foram resetados para 0.");
+    }
+
     public bool RemoverRecurso(TipoRecurso tipo, float valor)
     {
         if (recursos.ContainsKey(tipo) && recursos[tipo] >= valor)
@@ -74,6 +99,19 @@ public class GerenciadorRecursos : MonoBehaviour
         return false;
     }
 
+    public void SetRecurso(TipoRecurso tipo, float quantidade)
+    {
+        if (recursos.ContainsKey(tipo))
+        {
+            recursos[tipo] = quantidade;
+        }
+        else
+        {
+            recursos.Add(tipo, quantidade);
+        }
+        // Opcional: Disparar um evento aqui para que a UI de recursos seja atualizada imediatamente.
+        // Ex: OnRecursoAtualizado?.Invoke(tipo, quantidade);
+    }
     /// <summary>
     /// Retorna o valor atual do recurso especificado.
     /// </summary>

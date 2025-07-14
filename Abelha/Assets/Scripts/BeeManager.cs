@@ -1,6 +1,7 @@
-// BeeManager.cs
+// Scripts/BeeManager.cs
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI; // Necessário para NavMesh.SamplePosition
 
 public class BeeManager : MonoBehaviour
 {
@@ -26,6 +27,8 @@ public class BeeManager : MonoBehaviour
 
     [Header("Spawn e atraso inicial")]
     public Transform spawnPoint;
+    [Tooltip("Raio ao redor do spawnPoint para evitar que as abelhas apareçam umas sobre as outras.")]
+    public float spawnRadius = 1.5f; // <<-- VERIFIQUE ESTE VALOR NO INSPECTOR
     public float minInitialDelay = 0.5f;
     public float maxInitialDelay = 2f;
 
@@ -39,7 +42,6 @@ public class BeeManager : MonoBehaviour
 
     /// <summary>
     /// Tenta comprar e spawnar uma abelha do tipo especificado.
-    /// Retorna true se a compra e instância ocorreram com sucesso.
     /// </summary>
     public bool TrySpawnBee(string beeType)
     {
@@ -62,32 +64,120 @@ public class BeeManager : MonoBehaviour
             return false;
         }
 
-        // Remove o custo e instancia a abelha
-        GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Mel, data.cost);
-        var newBee = Instantiate(data.prefab, spawnPoint.position, spawnPoint.rotation);
-        float delay = Random.Range(minInitialDelay, maxInitialDelay);
+        // --- LÓGICA DE SPAWN COM RAIO (APLICADA AQUI) ---
+        Vector3 spawnPosition = GetRandomSpawnPosition();
+        // --- FIM DA LÓGICA DE SPAWN COM RAIO ---
 
-        // Ajusta o delay no script correto
-        switch (beeType)
-        {
-            case "WorkerBee":
-                var w = newBee.GetComponent<WorkerBee>();
-                if (w != null) w.initialDelay = delay;
-                break;
-            case "ProducerBee":
-                var p = newBee.GetComponent<ProducerBee>();
-                if (p != null) p.initialDelay = delay;
-                break;
-            // adicione mais cases para outros tipos
-        }
+        // Remove o custo e instancia a abelha na posição calculada
+        GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Mel, data.cost);
+        var newBee = Instantiate(data.prefab, spawnPosition, spawnPoint.rotation);
+        
+        // Aplica o delay inicial
+        ApplyInitialDelay(newBee, beeType);
 
         data.currentCount++;
         return true;
     }
 
     /// <summary>
-    /// Retorna uma string com a contagem de todas as abelhas (ex: "WorkerBee 2/3\nProducerBee 1/5").
+    /// Recria as abelhas na cena com base nos dados de contagem atuais.
     /// </summary>
+    public void RespawnBeesFromSaveData()
+    {
+        Debug.Log("Recriando abelhas a partir dos dados salvos...");
+        
+        GameObject[] existingBees = GameObject.FindGameObjectsWithTag("Bee");
+        foreach(GameObject bee in existingBees)
+        {
+            Destroy(bee);
+        }
+
+        foreach (var beeData in beeTypes)
+        {
+            for (int i = 0; i < beeData.currentCount; i++)
+            {
+                // --- ADICIONADA VERIFICAÇÃO DE PREFAB ---
+                if (beeData.prefab == null)
+                {
+                    Debug.LogError($"[BeeManager] O PREFAB para o tipo '{beeData.beeType}' está NULO no Inspector! Não é possível criar esta abelha. Por favor, atribua o prefab correto.");
+                    continue; // Pula para a próxima iteração, evitando o erro.
+                }
+                // --- FIM DA VERIFICAÇÃO ---
+                
+                Vector3 spawnPosition = GetRandomSpawnPosition();
+                var newBee = Instantiate(beeData.prefab, spawnPosition, spawnPoint.rotation);
+                ApplyInitialDelay(newBee, beeData.beeType);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calcula uma posição de spawn aleatória dentro do spawnRadius e válida no NavMesh.
+    /// </summary>
+    private Vector3 GetRandomSpawnPosition()
+    {
+// Gera um ponto em um círculo 2D e o converte para um vetor 3D no plano XZ.
+        Vector2 randomCirclePoint = Random.insideUnitCircle * spawnRadius;
+        Vector3 randomPositionOffset = new Vector3(randomCirclePoint.x, 0f, randomCirclePoint.y);
+        
+        // Posição de origem para a busca é o ponto de spawn + o offset aleatório no plano.
+        Vector3 searchPosition = spawnPoint.position + randomPositionOffset;
+
+        NavMeshHit hit;
+        Vector3 finalPosition = spawnPoint.position; // Posição de fallback caso a busca falhe
+
+        // Encontra a posição válida mais próxima no NavMesh
+        // O raio de busca agora pode ser menor, já que estamos mais perto do alvo
+        if (NavMesh.SamplePosition(searchPosition, out hit, spawnRadius, NavMesh.AllAreas))
+        {
+            finalPosition = hit.position;
+        }
+        else
+        {
+            Debug.LogWarning("NavMesh.SamplePosition falhou! A abelha será criada no spawnPoint central. Verifique se o spawnPoint está sobre uma área de NavMesh válida.");
+        }
+        return finalPosition;
+    }
+
+    /// <summary>
+    /// Aplica o delay inicial a uma abelha recém-criada.
+    /// </summary>
+    private void ApplyInitialDelay(GameObject beeInstance, string beeType)
+    {
+        float delay = Random.Range(minInitialDelay, maxInitialDelay);
+        
+        // Futuramente, isso pode ser melhorado com uma interface ISpawnable
+        switch (beeType)
+        {
+            case "WorkerBee":
+                var w = beeInstance.GetComponent<WorkerBee>();
+                if (w != null) w.initialDelay = delay;
+                break;
+            case "ProducerBee":
+                var p = beeInstance.GetComponent<ProducerBee>();
+                if (p != null) p.initialDelay = delay;
+                break;
+            case "QueenBee":
+                // A Rainha pode não ter um initialDelay, mas se tiver, a lógica vai aqui.
+                break;
+        }
+    }
+
+    // --- MÉTODOS EXISTENTES SEM ALTERAÇÃO ---
+
+    public void SetCurrentCount(string beeType, int count)
+    {
+        var data = beeTypes.Find(b => b.beeType == beeType);
+        if (data != null)
+        {
+            data.currentCount = count;
+        }
+        else
+        {
+            Debug.LogWarning($"[BeeManager] Tentativa de carregar contagem para tipo de abelha desconhecido: {beeType}");
+        }
+    }
+    
     public string GetBeeCountString()
     {
         var lines = new List<string>();
@@ -96,9 +186,6 @@ public class BeeManager : MonoBehaviour
         return string.Join("\n", lines);
     }
 
-    /// <summary>
-    /// Aumenta o limite máximo de um tipo de abelha (para upgrades futuros).
-    /// </summary>
     public void AumentarLimite(string beeType, int quantidade)
     {
         var data = beeTypes.Find(b => b.beeType == beeType);

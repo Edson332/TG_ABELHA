@@ -12,6 +12,20 @@ public class BeeUpgradeData : ScriptableObject
     public int nivelMelProduzido = 0;
     public int nivelVelocidade = 0;
 
+    public int nivelVidaCombate = 0;   // --- ADICIONADO ---
+    public int nivelAtaqueCombate = 0;
+
+
+    [Header("Configuração Base - Vida de Combate")]
+    public float custoBaseVida = 25f;
+    public float fatorCustoVida = 1.8f;
+    public float bonusVidaPorNivel = 0.15f; // +15% HP por nível
+
+    [Header("Configuração Base - Ataque de Combate")]
+    public float custoBaseAtaque = 30f;
+    public float fatorCustoAtaque = 2.0f;
+    public float bonusAtaquePorNivel = 0.12f; 
+
     [Header("Configuração Base - Néctar")]
     public float custoBaseNectar = 10f;
     public float fatorCustoNectar = 1.5f;
@@ -39,6 +53,10 @@ public class BeeUpgradeData : ScriptableObject
                 return 1f + (nivelMelProduzido * bonusProducaoPorNivel);
             case TipoUpgrade.VelocidadeMovimento:
                 return 1f + (nivelVelocidade * bonusVelocidadePorNivel);
+             case TipoUpgrade.VidaCombate:
+                return 1f + (nivelVidaCombate * bonusVidaPorNivel);
+            case TipoUpgrade.AtaqueCombate:
+                return 1f + (nivelAtaqueCombate * bonusAtaquePorNivel);
             default: return 1f;
         }
     }
@@ -53,6 +71,10 @@ public class BeeUpgradeData : ScriptableObject
                 return custoBaseProducao * Mathf.Pow(fatorCustoProducao, nivelMelProduzido);
             case TipoUpgrade.VelocidadeMovimento:
                 return custoBaseVelocidade * Mathf.Pow(fatorCustoVelocidade, nivelVelocidade);
+            case TipoUpgrade.VidaCombate:
+                return custoBaseVida * Mathf.Pow(fatorCustoVida, nivelVidaCombate);
+            case TipoUpgrade.AtaqueCombate:
+                return custoBaseAtaque * Mathf.Pow(fatorCustoAtaque, nivelAtaqueCombate);
             default: return float.MaxValue;
         }
     }
@@ -64,6 +86,8 @@ public class BeeUpgradeData : ScriptableObject
             case TipoUpgrade.NectarColetado: nivelNectarColetado++; break;
             case TipoUpgrade.MelProduzido: nivelMelProduzido++; break;
             case TipoUpgrade.VelocidadeMovimento: nivelVelocidade++; break;
+            case TipoUpgrade.VidaCombate: nivelVidaCombate++; break;
+            case TipoUpgrade.AtaqueCombate: nivelAtaqueCombate++; break;
         }
          // Importante: Marcar o ScriptableObject como "sujo" para que o Unity salve a mudança
         #if UNITY_EDITOR
@@ -77,8 +101,7 @@ public class BeeUpgradeData : ScriptableObject
         nivelNectarColetado = 0;
         nivelMelProduzido = 0;
         nivelVelocidade = 0;
-         #if UNITY_EDITOR
-        UnityEditor.EditorUtility.SetDirty(this);
-        #endif
+        nivelVidaCombate = 0;
+        nivelAtaqueCombate = 0;
     }
 }

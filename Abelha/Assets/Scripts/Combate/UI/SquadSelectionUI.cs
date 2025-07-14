@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-// using TMPro; // Descomente se usar TextMeshPro
+using TMPro;
 
 public class SquadSelectionUI : MonoBehaviour
 {
@@ -10,14 +10,18 @@ public class SquadSelectionUI : MonoBehaviour
     public GameObject selectionPanel;
     public int maxSquadSize = 3;
 
+    [Header("Tutorial")]
+    [Tooltip("Tutorial a ser exibido na primeira vez que esta tela abrir.")]
+    public TutorialStepSO squadSelectionTutorial; // <<--- CAMPO ADICIONADO
+
     [Header("Lista de Abelhas Disponíveis")]
-    public GameObject availableBeesContent; // O objeto com o Layout Group onde a lista será populada
-    public GameObject beeSelectionEntryPrefab; // O prefab de um item da lista (com o script BeeSelectionEntryUI)
+    public GameObject availableBeesContent;
+    public GameObject beeSelectionEntryPrefab;
 
     [Header("Display do Esquadrão Selecionado")]
-    public List<Image> selectedSquadSlots; // Lista de Images para mostrar os ícones do esquadrão
+    public List<Image> selectedSquadSlots;
     public Button fightButton;
-    public Text squadSizeText; // Ou TextMeshProUGUI
+    public TextMeshProUGUI squadSizeText; // Assumindo que você já usa TextMeshPro aqui
 
     private List<PlayerBeeCombatDataSO> _currentSelectedSquad = new List<PlayerBeeCombatDataSO>();
     private EnemyWaveSO _targetWave;
@@ -29,13 +33,26 @@ public class SquadSelectionUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Mostra e popula a tela de seleção de esquadrão.
+    /// Mostra e popula a tela de seleção de esquadrão. AGORA TAMBÉM DISPARA O TUTORIAL.
     /// </summary>
     public void ShowSelectionScreen(EnemyWaveSO waveData)
     {
         _targetWave = waveData;
         _currentSelectedSquad.Clear();
         _beeCountInSquad.Clear();
+
+        // --- LÓGICA DO TUTORIAL (ADICIONADA AQUI) ---
+        // Verifica se o tutorial deve ser mostrado antes de exibir o painel
+        if (squadSelectionTutorial != null &&
+            TutorialManager.Instancia != null &&
+            !TutorialManager.Instancia.HasCompletedTutorial(squadSelectionTutorial.tutorialID))
+        {
+            // A UI de seleção só será mostrada após o tutorial ser concluído.
+            // O TutorialManager pausa o jogo. Quando o jogador clica "Continuar",
+            // o jogo despausa e o código abaixo continua a ser percebido.
+            TutorialManager.Instancia.RequestTutorial(squadSelectionTutorial);
+        }
+        // --- FIM DA LÓGICA DO TUTORIAL ---
         
         PopulateAvailableBeesList();
         UpdateSelectedSquadDisplay();
@@ -45,19 +62,13 @@ public class SquadSelectionUI : MonoBehaviour
 
     private void PopulateAvailableBeesList()
     {
-        // Limpa a lista antiga
         foreach (Transform child in availableBeesContent.transform)
         {
             Destroy(child.gameObject);
         }
 
-        if (CombatManager.Instancia == null || BeeManager.Instancia == null)
-        {
-            Debug.LogError("CombatManager ou BeeManager não encontrados!");
-            return;
-        }
+        if (CombatManager.Instancia == null || BeeManager.Instancia == null) return;
 
-        // Popula com base nos dados de combate configurados no CombatManager
         foreach (var beeCombatData in CombatManager.Instancia.allPlayerBeeCombatData)
         {
             var beeDataFromManager = BeeManager.Instancia.beeTypes.Find(b => b.beeType == beeCombatData.beeTypeNameForUpgrades);
@@ -72,10 +83,9 @@ public class SquadSelectionUI : MonoBehaviour
             }
         }
     }
-
-    /// <summary>
-    /// Chamado pelo BeeSelectionEntryUI para adicionar uma abelha ao esquadrão.
-    /// </summary>
+    
+    // ... (O resto dos métodos AddBeeToSquad, RemoveLastBeeFromSquad, UpdateSelectedSquadDisplay,
+    // OnFightButtonPressed, OnCancelButtonPressed permanecem EXATAMENTE IGUAIS) ...
     public void AddBeeToSquad(PlayerBeeCombatDataSO beeDataToAdd)
     {
         var beeDataFromManager = BeeManager.Instancia.beeTypes.Find(b => b.beeType == beeDataToAdd.beeTypeNameForUpgrades);
@@ -83,7 +93,6 @@ public class SquadSelectionUI : MonoBehaviour
 
         int currentCountInSquad = _beeCountInSquad.ContainsKey(beeDataToAdd.beeTypeNameForUpgrades) ? _beeCountInSquad[beeDataToAdd.beeTypeNameForUpgrades] : 0;
 
-        // Verifica se ainda há espaço no esquadrão e se o jogador possui abelhas daquele tipo disponíveis
         if (_currentSelectedSquad.Count < maxSquadSize && currentCountInSquad < beeDataFromManager.currentCount)
         {
             _currentSelectedSquad.Add(beeDataToAdd);
@@ -102,14 +111,16 @@ public class SquadSelectionUI : MonoBehaviour
         {
             PlayerBeeCombatDataSO beeToRemove = _currentSelectedSquad[_currentSelectedSquad.Count - 1];
             _currentSelectedSquad.RemoveAt(_currentSelectedSquad.Count - 1);
-            _beeCountInSquad[beeToRemove.beeTypeNameForUpgrades]--;
+            if (_beeCountInSquad.ContainsKey(beeToRemove.beeTypeNameForUpgrades))
+            {
+                _beeCountInSquad[beeToRemove.beeTypeNameForUpgrades]--;
+            }
             UpdateSelectedSquadDisplay();
         }
     }
 
     private void UpdateSelectedSquadDisplay()
     {
-        // Atualiza os slots de ícones
         for (int i = 0; i < selectedSquadSlots.Count; i++)
         {
             if (i < _currentSelectedSquad.Count)
@@ -119,16 +130,15 @@ public class SquadSelectionUI : MonoBehaviour
             }
             else
             {
-                selectedSquadSlots[i].sprite = null; // Ou um sprite de slot vazio
+                selectedSquadSlots[i].sprite = null; 
                 selectedSquadSlots[i].enabled = false;
             }
         }
 
-        // Atualiza o texto do tamanho e o botão de lutar
         if (squadSizeText != null) squadSizeText.text = $"{_currentSelectedSquad.Count} / {maxSquadSize}";
         if (fightButton != null) fightButton.interactable = _currentSelectedSquad.Count > 0;
 
-        // Atualiza a interatividade dos botões de adicionar
+        if (availableBeesContent == null) return;
         foreach (Transform child in availableBeesContent.transform)
         {
             BeeSelectionEntryUI entryUI = child.GetComponent<BeeSelectionEntryUI>();
@@ -146,8 +156,6 @@ public class SquadSelectionUI : MonoBehaviour
             Debug.Log("Iniciando combate...");
             selectionPanel.SetActive(false);
             CombatManager.Instancia.StartNewCombat(_targetWave, _currentSelectedSquad);
-            // Não precisa notificar o InvasionScheduler aqui, pois o combate começou.
-            // O scheduler já está pausado pois o CombatManager.isCombatActive será true.
         }
     }
 
@@ -155,7 +163,7 @@ public class SquadSelectionUI : MonoBehaviour
     {
         Debug.Log("Seleção de esquadrão cancelada.");
         selectionPanel.SetActive(false);
-        // Notifica o scheduler que uma decisão foi tomada e o combate foi cancelado
+        
         if (InvasionScheduler.Instancia != null)
         {
             InvasionScheduler.Instancia.AlertDecisionMade();

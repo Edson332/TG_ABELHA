@@ -48,7 +48,8 @@ public class CombatManager : MonoBehaviour
     [Tooltip("Arraste um ScriptableObject EnemyWaveSO para teste.")]
     public EnemyWaveSO testWaveToUse;
 
-
+    [Header("Referências da UI de Combate")]
+    public CombatResultsUI combatResultsUI; // A
     private List<Combatant3D> _playerCombatants = new List<Combatant3D>();
     private List<Combatant3D> _enemyCombatants = new List<Combatant3D>();
 
@@ -237,17 +238,53 @@ public class CombatManager : MonoBehaviour
             if (GerenciadorRecursos.Instancia != null) {
                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, currentOperatingWave.honeyReward);
                 Debug.Log($"Recompensa: {currentOperatingWave.honeyReward} de Mel adicionada.");
-            } else {
-                Debug.LogWarning("GerenciadorRecursos.Instancia não encontrado para dar recompensa.");
             }
         }
         
-        StartCoroutine(ConcludeCombatSequence());
+        // Mostra a UI de resultados e espera a interação do jogador
+        if (combatResultsUI != null)
+        {
+            combatResultsUI.ShowResults(playerWon, currentOperatingWave);
+        }
+        else
+        {
+            // Se não houver UI, finaliza o combate diretamente após um delay
+            Debug.LogWarning("CombatResultsUI não atribuído no CombatManager. Finalizando combate automaticamente.");
+            StartCoroutine(CleanupCombatSequence());
+        }
     }
+    
+    public void ConcludeCombatAfterResults()
+    {
+        StartCoroutine(CleanupCombatSequence());
+    }
+
+    private IEnumerator CleanupCombatSequence()
+    {
+        // Não precisa de delay aqui, pois o jogador já viu a tela de resultados.
+        // Apenas um frame de espera para garantir que tudo ocorra na ordem certa.
+        yield return null;
+
+        ClearPreviousCombatants(); 
+
+        if (combatCamera != null) combatCamera.gameObject.SetActive(false);
+        if (mainGameCamera != null) mainGameCamera.gameObject.SetActive(true);
+        
+        currentCombatState = CombatState.Finished; 
+        Debug.Log("Sequência de conclusão de combate finalizada. Retornando ao jogo principal.");
+
+        if (InvasionScheduler.Instancia != null)
+        {
+            InvasionScheduler.Instancia.AlertDecisionMade();
+            Debug.Log("InvasionScheduler reativado.");
+        }
+    }
+
 
     private void SpawnPlayerTeam(List<PlayerBeeCombatDataSO> playerTeamData, List<Transform> spawnPointList)
     {
         int spawnIndex = 0;
+        
         foreach (var dataSO in playerTeamData)
         {
             if (spawnIndex >= spawnPointList.Count) { Debug.LogWarning("Faltam pontos de spawn para time do jogador."); break; }
@@ -264,15 +301,15 @@ public class CombatManager : MonoBehaviour
 
             if (GerenciadorUpgrades.Instancia != null && !string.IsNullOrEmpty(dataSO.beeTypeNameForUpgrades))
             {
-                // Usando NectarColetado para Vida e MelProduzido para Ataque como exemplo
-                // Idealmente, crie TiposUpgrade específicos como "VidaCombate" e "AtaqueCombate"
-                float hpMultiplier = 1f + (GerenciadorUpgrades.Instancia.GetLevel(dataSO.beeTypeNameForUpgrades, TipoUpgrade.NectarColetado) * 0.05f); 
-                float attackMultiplier = 1f + (GerenciadorUpgrades.Instancia.GetLevel(dataSO.beeTypeNameForUpgrades, TipoUpgrade.MelProduzido) * 0.05f); 
-                
+
+                float hpMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(dataSO.beeTypeNameForUpgrades, TipoUpgrade.VidaCombate);
+                float attackMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(dataSO.beeTypeNameForUpgrades, TipoUpgrade.AtaqueCombate);
                 finalMaxHP = Mathf.RoundToInt(dataSO.baseMaxHP * hpMultiplier);
                 finalAttack = Mathf.RoundToInt(dataSO.baseAttack * attackMultiplier);
+                Debug.Log($"Player Bee {dataSO.combatantName} ({dataSO.beeTypeNameForUpgrades}): HP Final={finalMaxHP}, ATK Final={finalAttack}");
+
             }
-            
+
             InstantiateAndAssignHealthBar(combatantScript, dataSO.combatantName, finalMaxHP, finalAttack, true);
             _playerCombatants.Add(combatantScript);
             spawnIndex++;
@@ -380,31 +417,5 @@ public class CombatManager : MonoBehaviour
         _enemyCombatants.Clear();
     }
 
-    private IEnumerator ConcludeCombatSequence()
-    {
-        currentCombatState = CombatState.Resolving; // Marcar que está resolvendo
-        yield return new WaitForSeconds(postCombatUIDelay); // Tempo para o jogador ver o resultado
 
-        ClearPreviousCombatants();
-
-        if (combatCamera != null) combatCamera.gameObject.SetActive(false);
-        if (mainGameCamera != null) mainGameCamera.gameObject.SetActive(true);
-
-        currentCombatState = CombatState.Finished; // Combate realmente finalizado
-        Debug.Log("Sequência de conclusão de combate finalizada. Retornando ao jogo principal.");
-         if (InvasionScheduler.Instancia != null)
-    {
-        // Notifica o agendador que o ciclo de invasão terminou e ele pode agendar o próximo.
-        InvasionScheduler.Instancia.AlertDecisionMade();
-        Debug.Log("InvasionScheduler reativado.");
-    }
-    else
-    {
-        Debug.LogWarning("InvasionScheduler não encontrado para reativar o agendamento.");
-    }
-    // ----------------------------------------------------------------
-
-    
-    // TODO: Mostrar UI de resultado de batalha e botão para voltar ao jogo principal/fechar UI de combate.
-    }
 }

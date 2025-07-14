@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 4047342497693953651}
   m_Layer: 0
   m_Name: Worker
-  m_TagString: Untagged
+  m_TagString: Bee
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -355,9 +355,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beeTypeName: WorkerBee
-  flower: {fileID: 0}
-  honeycomb: {fileID: 0}
-  hive: {fileID: 0}
+  flower: {fileID: 1998422242952201062, guid: f57553bb65eea7b4ab7f864d2dee4533, type: 3}
+  honeycomb: {fileID: 8723335841685053810, guid: b39b78018e1672945a054d1748fe0882, type: 3}
+  hive: {fileID: 6270863943091762328, guid: 5aa46da0e2fea0140be073911fc6b7a8, type: 3}
   baseCollectionTime: 2
   baseProcessingTime: 2
   baseDepositTime: 2

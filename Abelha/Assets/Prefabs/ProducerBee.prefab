@@ -535,7 +535,7 @@ GameObject:
   - component: {fileID: 1918172298745327545}
   m_Layer: 0
   m_Name: ProducerBee
-  m_TagString: Untagged
+  m_TagString: Bee
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -614,15 +614,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beeTypeName: ProducerBee
-  flower: {fileID: 0}
-  honeycomb: {fileID: 0}
-  hive: {fileID: 0}
+  flower: {fileID: 1998422242952201062, guid: f57553bb65eea7b4ab7f864d2dee4533, type: 3}
+  honeycomb: {fileID: 8723335841685053810, guid: b39b78018e1672945a054d1748fe0882, type: 3}
+  hive: {fileID: 6270863943091762328, guid: 5aa46da0e2fea0140be073911fc6b7a8, type: 3}
   baseProductionTime: 2
   baseDepositTime: 2
   baseCollectionTime: 2
   baseProductionAmount: 1
   baseSpeed: 3
-  initialDelay: 0
+  initialDelay: 0.5
   destinationOffsetRadius: 1
 --- !u!1 &9121501698513786497
 GameObject:
