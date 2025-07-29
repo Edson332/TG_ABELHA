@@ -18,8 +18,17 @@ public class BeeManager : MonoBehaviour
         public int cost;
         [Tooltip("Quantidade máxima de unidades que o jogador pode ter")]
         public int maxCount;
+
+        [Tooltip("Nome de exibição para a UI (ex: Abelha Trabalhadora).")]
+        public string displayName;
+        [Tooltip("Para abelhas passivas, a quantidade de Mel que geram por segundo. Deixe 0 para outras.")]
+        public float incomePerSecond = 0f;
         [HideInInspector]
         public int currentCount;
+
+        [Tooltip("Marque esta opção se esta for uma das abelhas primárias (Worker, Producer, Guard).")]
+        public bool isPrimary = false; 
+        
     }
 
     [Header("Configuração de tipos de abelha")]
@@ -43,6 +52,27 @@ public class BeeManager : MonoBehaviour
     /// <summary>
     /// Tenta comprar e spawnar uma abelha do tipo especificado.
     /// </summary>
+    /// 
+    /// 
+    public bool AreAllPrimaryBeesUnlocked()
+    {
+        // Percorre a lista de todos os tipos de abelhas
+        foreach (var beeData in beeTypes)
+        {
+            // Se encontrarmos uma abelha que É primária...
+            if (beeData.isPrimary)
+            {
+                // ...e o jogador NÃO a possui (contagem é 0), então a condição não foi atendida.
+                if (beeData.currentCount <= 0)
+                {
+                    return false; // Retorna falso imediatamente
+                }
+            }
+        }
+
+        // Se o loop terminar sem retornar falso, significa que todas as primárias foram compradas.
+        return true;
+    }
     public bool TrySpawnBee(string beeType)
     {
         var data = beeTypes.Find(b => b.beeType == beeType);

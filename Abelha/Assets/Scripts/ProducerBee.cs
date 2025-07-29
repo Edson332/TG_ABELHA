@@ -3,9 +3,10 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class ProducerBee : MonoBehaviour, BeeStatsUpdater // Adicione IBoostableByQueen se ela for afetada pela aura
+public class ProducerBee : MonoBehaviour, BeeStatsUpdater
 {
     [Header("Identificação")]
+    [Tooltip("ID interno do tipo. DEVE CORRESPONDER ao usado nos ScriptableObjects de Upgrade e no BeeManager.")]
     public string beeTypeName = "ProducerBee";
 
     [Header("Parâmetros Base (Antes dos Upgrades)")]
@@ -20,7 +21,6 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater // Adicione IBoostable
     public float destinationOffsetRadius = 1f;
 
     // Referências de destino agora são privadas
-    private Transform _flowerTarget;
     private Transform _honeycombTarget;
     private Transform _hiveTarget;
 
@@ -36,7 +36,7 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater // Adicione IBoostable
     {
         if (string.IsNullOrEmpty(beeTypeName))
         {
-            Debug.LogError($"Abelha {gameObject.name} não tem um beeTypeName definido!");
+            Debug.LogError($"Abelha {gameObject.name} não tem um beeTypeName definido!", this);
             this.enabled = false;
             return;
         }
@@ -44,7 +44,6 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater // Adicione IBoostable
         // Pega as referências dos destinos do LocationsManager
         if (LocationsManager.Instancia != null)
         {
-            _flowerTarget = LocationsManager.Instancia.flowerTarget;
             _honeycombTarget = LocationsManager.Instancia.honeycombTarget;
             _hiveTarget = LocationsManager.Instancia.hiveTarget;
         }
@@ -99,42 +98,36 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater // Adicione IBoostable
             float productionMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.MelProduzido);
             float nectarMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.NectarColetado);
 
-            if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Nectar) >= _effectiveProductionAmount)
+            // 1. Tenta pegar Néctar do estoque global
+            if (GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Nectar, _effectiveProductionAmount))
             {
-                if (GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Nectar, _effectiveProductionAmount))
-                {
-                    // Processar
-                    yield return StartCoroutine(MoveToTarget(GetRandomDestination(_honeycombTarget.position)));
-                    yield return new WaitForSeconds(baseProductionTime);
-                    GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.MelProcessado, _effectiveProductionAmount);
-
-                    // Depositar
-                    yield return StartCoroutine(MoveToTarget(GetRandomDestination(_hiveTarget.position)));
-                    yield return new WaitForSeconds(baseDepositTime);
-                    float melFinalAmount = _effectiveProductionAmount * productionMultiplier;
-                    if (GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.MelProcessado, _effectiveProductionAmount))
-                    {
-                        GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
-                    }
-                    else
-                    {
-                        GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, _effectiveProductionAmount);
-                        yield return new WaitForSeconds(1f); continue;
-                    }
-                }
-                else
-                {
-                    yield return new WaitForSeconds(0.5f); continue;
-                }
+                // Conseguiu, agora vai processar e depositar
+                // Processar
+                yield return StartCoroutine(MoveToTarget(GetRandomDestination(_honeycombTarget.position)));
+                yield return new WaitForSeconds(baseProductionTime);
+                
+                // Depositar
+                yield return StartCoroutine(MoveToTarget(GetRandomDestination(_hiveTarget.position)));
+                yield return new WaitForSeconds(baseDepositTime);
+                float melFinalAmount = _effectiveProductionAmount * productionMultiplier;
+                GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
             }
             else
             {
-                // Coletar Nectar se faltar no estoque
-                yield return StartCoroutine(MoveToTarget(GetRandomDestination(_flowerTarget.position)));
+                // 2. Se não conseguiu, vai coletar Néctar para o estoque
+                Transform targetFlower = LocationsManager.Instancia.GetRandomFlowerTarget();
+                if (targetFlower == null)
+                {
+                    Debug.LogWarning("Nenhuma flor encontrada, esperando...", this);
+                    yield return new WaitForSeconds(5f);
+                    continue;
+                }
+
+                yield return StartCoroutine(MoveToTarget(GetRandomDestination(targetFlower.position)));
                 yield return new WaitForSeconds(baseCollectionTime);
                 float nectarColetado = baseProductionAmount * nectarMultiplier;
                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, nectarColetado);
-                yield return new WaitForSeconds(0.5f); continue;
+                yield return new WaitForSeconds(0.5f); // Pequena pausa antes de tentar pegar de novo
             }
 
             yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));

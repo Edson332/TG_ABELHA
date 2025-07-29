@@ -9,7 +9,7 @@ public class QueenBeeController : MonoBehaviour
 {
     // --- Singleton Instance ---
     public static QueenBeeController Instancia { get; private set; }
-
+    private List<PassiveBee> _boostedPassiveBees = new List<PassiveBee>();
     [Header("Configuração da Aura")]
     public float auraRadius = 8f; // Raio da aura de boost
     public LayerMask beeLayerMask; // Configurar no Inspector para a layer das abelhas Worker/Producer
@@ -86,19 +86,29 @@ public class QueenBeeController : MonoBehaviour
     /// </summary>
     private void CheckBeesInAura()
     {
+        _boostedPassiveBees.Clear();
+
         int count = Physics.OverlapSphereNonAlloc(transform.position, auraRadius, _collidersInAura, beeLayerMask);
 
         HashSet<IBoostableByQueen> currentBeesFound = new HashSet<IBoostableByQueen>();
 
         for (int i = 0; i < count; i++)
         {
+            Collider col = _collidersInAura[i];
             // Tenta obter a interface IBoostableByQueen da abelha encontrada
             IBoostableByQueen boostable = _collidersInAura[i].GetComponent<IBoostableByQueen>();
             if (boostable != null)
             {
                 currentBeesFound.Add(boostable);
             }
+
+            PassiveBee passiveBee = col.GetComponent<PassiveBee>();
+            if (passiveBee != null)
+            {
+                _boostedPassiveBees.Add(passiveBee);
+            }
         }
+
 
         // Determina quem entrou e quem saiu desde a última checagem
         List<IBoostableByQueen> newlyEntered = currentBeesFound.Except(_beesInAura).ToList();
@@ -115,13 +125,17 @@ public class QueenBeeController : MonoBehaviour
         // System.Array.Clear(_collidersInAura, count, _collidersInAura.Length - count);
     }
 
+    public List<PassiveBee> GetBoostedPassiveBees()
+    {
+        return _boostedPassiveBees;
+    }
     private void NotifyBeesOfEntry(List<IBoostableByQueen> bees)
     {
         foreach (var bee in bees)
         {
             if (bee != null) // Verifica se a abelha não foi destruída entre a detecção e a notificação
             {
-               // Debug.Log($"Abelha {((MonoBehaviour)bee).gameObject.name} entrou na aura.");
+                // Debug.Log($"Abelha {((MonoBehaviour)bee).gameObject.name} entrou na aura.");
                 bee.EnterQueenAura(nectarAmountMultiplier, actionTimeMultiplier);
             }
         }

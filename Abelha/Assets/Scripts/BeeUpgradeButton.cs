@@ -33,6 +33,16 @@ public class BeeUpgradeButton : MonoBehaviour
         }
     }
 
+    public void OnBuyEuropaBeeClicked()
+    {
+        bool comprou = BeeManager.Instancia.TrySpawnBee("EuropaBee");
+        if (!comprou)
+        {
+            // Feedback de erro
+            Debug.Log("Não foi possível comprar a Abelha Europa.");
+        }
+    }
+
     /// <summary>
     /// Chamado pelo botão para comprar a QueenBee.
     /// </summary>

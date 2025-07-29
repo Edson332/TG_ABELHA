@@ -1,95 +1,85 @@
-﻿using UnityEngine;
-using UnityEngine.EventSystems; // Required for IPointer handlers
-using System.Collections; // Required for Coroutines
+﻿// Scripts/UI/TooltipTrigger.cs
+using UnityEngine;
+using UnityEngine.EventSystems;
+using System.Collections;
 
-// Implementa as interfaces para detectar entrada e saída do ponteiro
 public class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Tooltip Content")]
-    [Tooltip("The main body text for the tooltip.")]
-    [SerializeField]
-    [TextArea(3, 10)] // Melhora a visualização de textos longos no Inspector
-    string mBodyText;
-
-    [Tooltip("Optional header text for the tooltip.")]
-    [SerializeField]
-    string mHeaderText; // <<<--- NOVO: Texto do Header
-
+    [Header("Tooltip Content (Default)")]
+    [TextArea(3, 10)]
+    [SerializeField] string mBodyText;
+    [SerializeField] string mHeaderText;
+    
     [Header("Behavior")]
-    [Tooltip("Delay in seconds before the tooltip appears after hovering.")]
-    [SerializeField]
-    float showDelay = 1.0f; // <<<--- NOVO: Delay para mostrar
+    [SerializeField] float showDelay = 0.5f;
+    
+    private Coroutine _showCoroutine;
+    private bool _isHovering = false; // --- ADICIONADO --- Flag para saber se o mouse está em cima
 
-    private Coroutine showCoroutine; // Referência para a coroutine de exibição
-
-    // Chamado quando o ponteiro do mouse entra na área do objeto com este script
+    // --- NOVO MÉTODO UPDATE ---
+    void Update()
+    {
+        // Se o mouse estiver sobre este objeto e o tooltip já estiver visível,
+        // força a atualização.
+        if (_isHovering && Tooltip.Instance != null && Tooltip.Instance.gameObject.activeSelf)
+        {
+            Tooltip.Instance.SetTooltip(mBodyText, mHeaderText);
+        }
+    }
+    
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // Cancela qualquer coroutine anterior que possa estar rodando (segurança)
+        _isHovering = true; // --- ADICIONADO ---
         StopTooltipCoroutine();
-
-        // Inicia a nova coroutine para mostrar o tooltip após o delay
-        showCoroutine = StartCoroutine(ShowTooltipAfterDelay());
+        _showCoroutine = StartCoroutine(ShowTooltipAfterDelay());
     }
 
-    // Chamado quando o ponteiro do mouse sai da área do objeto
     public void OnPointerExit(PointerEventData eventData)
     {
-        // Cancela a coroutine de exibição (se o mouse sair antes do delay)
+        _isHovering = false; // --- ADICIONADO ---
         StopTooltipCoroutine();
-
-        // Esconde o tooltip imediatamente
-        // Verifica se Instance não é null antes de chamar (caso o tooltip seja destruído)
         if (Tooltip.Instance != null)
         {
             Tooltip.Instance.HideTooltip();
         }
     }
 
-    // Coroutine que espera o delay e então mostra o tooltip
     private IEnumerator ShowTooltipAfterDelay()
     {
-        // Espera pelo tempo definido em showDelay
-        yield return new WaitForSeconds(showDelay);
+        yield return new WaitForSecondsRealtime(showDelay);
 
-        // Após o delay, mostra o tooltip com o header e o body
-        // Verifica se Instance não é null antes de chamar
-        if (Tooltip.Instance != null)
+        // A verificação _isHovering garante que o tooltip não apareça se o mouse
+        // já tiver saído durante o delay.
+        if (_isHovering && Tooltip.Instance != null)
         {
-            // Chama o SetTooltip atualizado, passando ambos os textos
             Tooltip.Instance.SetTooltip(mBodyText, mHeaderText);
         }
-
-        // Reseta a referência da coroutine, pois ela terminou
-        showCoroutine = null;
+        _showCoroutine = null;
     }
 
-    // Método auxiliar para parar a coroutine de forma segura
     private void StopTooltipCoroutine()
     {
-        if (showCoroutine != null)
+        if (_showCoroutine != null)
         {
-            StopCoroutine(showCoroutine);
-            showCoroutine = null;
+            StopCoroutine(_showCoroutine);
+            _showCoroutine = null;
         }
     }
-
-    // Método para permitir a atualização do texto do tooltip via script (opcional)
-    public void SetTooltipContent(string newBodyText, string newHeaderText = null)
+    
+    public void SetTooltipContent(string newBodyText, string newHeaderText = "")
     {
         mBodyText = newBodyText;
-        mHeaderText = newHeaderText; // Atualiza o header também
+        mHeaderText = newHeaderText;
     }
 
-    // Garante que o tooltip seja escondido se o objeto for desativado/destruído
     void OnDisable()
     {
+        // Garante que tudo seja resetado se o objeto for desativado
+        _isHovering = false; 
         StopTooltipCoroutine();
-        if (Tooltip.Instance != null && Tooltip.Instance.gameObject.activeSelf) // Verifica se o tooltip está ativo
+        if (Tooltip.Instance != null && Tooltip.Instance.gameObject.activeSelf)
         {
-             // Poderia verificar se este trigger é o que está mostrando o tooltip atualmente
-             // para evitar esconder um tooltip de outro trigger, mas para simplificar:
-             Tooltip.Instance.HideTooltip();
+            Tooltip.Instance.HideTooltip();
         }
     }
 }

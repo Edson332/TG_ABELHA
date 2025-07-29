@@ -6,6 +6,7 @@ using UnityEngine.AI;
 public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
 {
     [Header("Identificação")]
+    [Tooltip("ID interno do tipo. DEVE CORRESPONDER ao usado nos ScriptableObjects de Upgrade e no BeeManager.")]
     public string beeTypeName = "WorkerBee";
 
     [Header("Parâmetros Base (Antes dos Upgrades)")]
@@ -20,7 +21,6 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
     public float destinationOffsetRadius = 1f;
 
     // Referências de destino agora são privadas e obtidas do LocationsManager
-    private Transform _flowerTarget;
     private Transform _honeycombTarget;
     private Transform _hiveTarget;
     
@@ -43,7 +43,7 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
     {
         if (string.IsNullOrEmpty(beeTypeName))
         {
-            Debug.LogError($"Abelha {gameObject.name} não tem um beeTypeName definido!");
+            Debug.LogError($"Abelha {gameObject.name} não tem um beeTypeName definido!", this);
             this.enabled = false;
             return;
         }
@@ -51,7 +51,7 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
         // Pega as referências dos destinos do nosso Singleton LocationsManager
         if (LocationsManager.Instancia != null)
         {
-            _flowerTarget = LocationsManager.Instancia.flowerTarget;
+            // Note que não pegamos mais a flor aqui, pois ela é selecionada aleatoriamente a cada ciclo.
             _honeycombTarget = LocationsManager.Instancia.honeycombTarget;
             _hiveTarget = LocationsManager.Instancia.hiveTarget;
         }
@@ -81,7 +81,7 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
         {
             GerenciadorUpgrades.Instancia.DesregistrarAbelha(this, beeTypeName);
         }
-        ExitQueenAura();
+        ExitQueenAura(); // Garante que o estado de buff seja resetado
     }
 
     public void EnterQueenAura(float amountMultiplier, float timeMultiplier)
@@ -116,7 +116,7 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
     private IEnumerator StartWorker()
     {
         if (initialDelay > 0f) yield return new WaitForSeconds(initialDelay);
-        yield return null;
+        yield return null; // Garante que o Start() de outros scripts tenha rodado
         if (agent != null && agent.isOnNavMesh)
         {
              UpdateUpgradeMultipliers();
@@ -128,8 +128,15 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
     {
         while (true)
         {
-            // --- Coleta de Néctar ---
-            yield return StartCoroutine(MoveToTarget(GetRandomDestination(_flowerTarget.position)));
+            // --- 1. Coleta de Néctar ---
+            Transform targetFlower = LocationsManager.Instancia.GetRandomFlowerTarget();
+            if (targetFlower == null)
+            {
+                Debug.LogWarning("Nenhuma flor encontrada, esperando...", this);
+                yield return new WaitForSeconds(5f);
+                continue; // Pula para a próxima iteração do loop
+            }
+            yield return StartCoroutine(MoveToTarget(GetRandomDestination(targetFlower.position)));
             
             _effectiveCollectionAmount = baseCollectionAmount * _currentNectarMultiplierFromUpgrades;
             float finalCollectionAmount = _effectiveCollectionAmount * (_isInQueenAura ? _queenAmountMultiplier : 1f);
@@ -138,17 +145,24 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
             yield return new WaitForSeconds(finalCollectionTime);
             GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, finalCollectionAmount);
 
-            // --- Processamento ---
+            // --- 2. Processamento ---
             yield return StartCoroutine(MoveToTarget(GetRandomDestination(_honeycombTarget.position)));
             float finalProcessingTime = baseProcessingTime * (_isInQueenAura ? _queenTimeMultiplier : 1f);
             yield return new WaitForSeconds(finalProcessingTime);
 
+            // A abelha só processa o que ela mesma acabou de coletar
             if (GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Nectar, finalCollectionAmount))
             {
-                GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.MelProcessado, finalCollectionAmount);
-            } else { yield return new WaitForSeconds(1f); continue; }
+                // Não salvamos MelProcessado, então a abelha o "carrega" conceitualmente
+            } 
+            else 
+            { 
+                // Se o néctar não estiver lá (improvável neste fluxo), ela volta a coletar
+                yield return new WaitForSeconds(1f); 
+                continue; 
+            }
 
-            // --- Depósito de Mel ---
+            // --- 3. Depósito de Mel ---
             yield return StartCoroutine(MoveToTarget(GetRandomDestination(_hiveTarget.position)));
             
             float finalDepositTime = baseDepositTime * (_isInQueenAura ? _queenTimeMultiplier : 1f);
@@ -156,10 +170,8 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
             float melFinalAmount = finalCollectionAmount * finalProductionMultiplier;
             
             yield return new WaitForSeconds(finalDepositTime);
-            if(GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.MelProcessado, finalCollectionAmount))
-            {
-                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
-            } else { yield return new WaitForSeconds(1f); continue; }
+            // Adiciona o mel final diretamente. Não interagimos com o recurso MelProcessado.
+            GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
             
             yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
         }
@@ -170,7 +182,10 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
         Vector2 randomOffset = Random.insideUnitCircle * destinationOffsetRadius;
         Vector3 targetPos = basePosition + new Vector3(randomOffset.x, 0, randomOffset.y);
         NavMeshHit hit;
-        if (NavMesh.SamplePosition(targetPos, out hit, destinationOffsetRadius * 2, NavMesh.AllAreas)) { return hit.position; }
+        if (NavMesh.SamplePosition(targetPos, out hit, destinationOffsetRadius * 2, NavMesh.AllAreas)) 
+        { 
+            return hit.position; 
+        }
         return basePosition;
     }
 

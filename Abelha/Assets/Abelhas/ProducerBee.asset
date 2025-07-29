@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd3c33ac872631c488f6f8e96eec822e, type: 3}
   m_Name: ProducerBee
   m_EditorClassIdentifier: 
+  combatantName: 
   beeTypeName: ProducerBee
   nivelNectarColetado: 0
-  nivelMelProduzido: 6
-  nivelVelocidade: 3
+  nivelMelProduzido: 0
+  nivelVelocidade: 0
+  nivelVidaCombate: 0
+  nivelAtaqueCombate: 0
   custoBaseNectar: 5
   fatorCustoNectar: 1.5
   bonusNectarPorNivel: 0.1
@@ -25,3 +28,9 @@ MonoBehaviour:
   custoBaseVelocidade: 2
   fatorCustoVelocidade: 1.7
   bonusVelocidadePorNivel: 0.5
+  custoBaseVida: 25
+  fatorCustoVida: 1.8
+  bonusVidaPorNivel: 0.15
+  custoBaseAtaque: 30
+  fatorCustoAtaque: 2
+  bonusAtaquePorNivel: 0.12

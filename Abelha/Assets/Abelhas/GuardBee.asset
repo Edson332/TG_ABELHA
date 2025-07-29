@@ -12,18 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd3c33ac872631c488f6f8e96eec822e, type: 3}
   m_Name: GuardBee
   m_EditorClassIdentifier: 
+  combatantName: 
   beeTypeName: GuardBee
   nivelNectarColetado: 0
   nivelMelProduzido: 0
   nivelVelocidade: 0
   nivelVidaCombate: 0
   nivelAtaqueCombate: 0
-  custoBaseVida: 25
-  fatorCustoVida: 1.8
-  bonusVidaPorNivel: 0.15
-  custoBaseAtaque: 30
-  fatorCustoAtaque: 2
-  bonusAtaquePorNivel: 0.12
   custoBaseNectar: 10
   fatorCustoNectar: 1.5
   bonusNectarPorNivel: 0.1
@@ -33,3 +28,9 @@ MonoBehaviour:
   custoBaseVelocidade: 20
   fatorCustoVelocidade: 1.7
   bonusVelocidadePorNivel: 0.08
+  custoBaseVida: 25
+  fatorCustoVida: 1.8
+  bonusVidaPorNivel: 0.15
+  custoBaseAtaque: 30
+  fatorCustoAtaque: 2
+  bonusAtaquePorNivel: 0.12
