@@ -7,8 +7,11 @@ using System.Collections; // Essencial para Coroutines
 public class PassiveBee : MonoBehaviour
 {
     [Header("Identificação")]
+    [Tooltip("Nome único do tipo de abelha, deve corresponder ao do BeeManager.")]
     public string beeType; 
+
     [Header("Geração de Renda")]
+    [Tooltip("Quantidade de Mel que esta abelha gera por segundo.")]
     public float baseIncomePerSecond = 1f;
 
     [Header("Comportamento de Movimento")]
@@ -47,7 +50,7 @@ public class PassiveBee : MonoBehaviour
 
         if (LocationsManager.Instancia == null || beeVisuals == null)
         {
-            Debug.LogError($"Configuração incompleta na abelha {gameObject.name}! Desativando.", this);
+            Debug.LogError($"Configuração incompleta na abelha {gameObject.name}! Verifique se LocationsManager existe e se 'beeVisuals' está atribuído. Desativando...", this);
             this.enabled = false;
             return;
         }
@@ -55,9 +58,42 @@ public class PassiveBee : MonoBehaviour
         // Inicia a rotina principal
         _patrolCoroutine = StartCoroutine(PatrolRoutine());
     }
+
+    void OnEnable()
+    {
+        if (PassiveIncomeManager.Instancia != null)
+        {
+            PassiveIncomeManager.Instancia.RegisterPassiveBee(this);
+        }
+        if (BeeVisualsManager.Instancia != null)
+        {
+            BeeVisualsManager.Instancia.RegisterPassiveBee(this);
+        }
+    }
+
+    void OnDisable()
+    {
+        if (PassiveIncomeManager.Instancia != null)
+        {
+            PassiveIncomeManager.Instancia.UnregisterPassiveBee(this);
+        }
+        if (BeeVisualsManager.Instancia != null)
+        {
+            BeeVisualsManager.Instancia.UnregisterPassiveBee(this);
+        }
+    }
     
-    void OnEnable() { if (PassiveIncomeManager.Instancia != null) PassiveIncomeManager.Instancia.RegisterPassiveBee(this); }
-    void OnDisable() { if (PassiveIncomeManager.Instancia != null) PassiveIncomeManager.Instancia.UnregisterPassiveBee(this); }
+    /// <summary>
+    /// Ativa ou desativa o GameObject que contém o modelo 3D da abelha.
+    /// Chamado pelo BeeVisualsManager.
+    /// </summary>
+    public void SetVisualsActive(bool isActive)
+    {
+        if (beeVisuals != null && beeVisuals.gameObject.activeSelf != isActive)
+        {
+            beeVisuals.gameObject.SetActive(isActive);
+        }
+    }
 
     private IEnumerator PatrolRoutine()
     {
@@ -73,7 +109,7 @@ public class PassiveBee : MonoBehaviour
                 yield return _resetVisualsCoroutine;
             }
 
-            // 1. Decide o próximo destino
+            // 1. Decide o próximo destino (flor ou colmeia)
             Transform targetObject;
             if (Random.value < chanceDeVisitarFlor)
             {
@@ -86,8 +122,9 @@ public class PassiveBee : MonoBehaviour
 
             if (targetObject == null)
             {
+                Debug.LogWarning("Não foi possível encontrar um destino válido. Tentando novamente em 5s.", this);
                 yield return new WaitForSeconds(5f);
-                continue; // Tenta novamente
+                continue; // Tenta novamente no próximo ciclo
             }
 
             // 2. Calcula um ponto aleatório ao redor do destino
@@ -97,7 +134,7 @@ public class PassiveBee : MonoBehaviour
             // 3. Espera chegar ao destino
             yield return new WaitUntil(() => !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance);
 
-            // 4. Chegou! Começa a pairar e espera um tempo
+            // 4. Chegou! Começa a pairar e espera um tempo aleatório
             StartHovering();
             yield return new WaitForSeconds(Random.Range(3f, 8f));
         }
@@ -112,7 +149,7 @@ public class PassiveBee : MonoBehaviour
         {
             return hit.position;
         }
-        return basePosition;
+        return basePosition; // Retorna a posição central se não encontrar um ponto válido
     }
     
     private void StartHovering()
@@ -130,14 +167,14 @@ public class PassiveBee : MonoBehaviour
             StopCoroutine(_hoverCoroutine);
             _hoverCoroutine = null;
         }
-        // Em vez de resetar a posição instantaneamente, inicia uma coroutine para fazer isso suavemente
+        // Inicia a coroutine para resetar a posição suavemente
         if (_resetVisualsCoroutine == null)
         {
             _resetVisualsCoroutine = StartCoroutine(SmoothlyResetVisualsPosition());
         }
     }
 
-    // A SOLUÇÃO PARA O TELEPORTE
+    // Coroutine para resetar suavemente a posição do modelo visual, evitando o "teleporte"
     private IEnumerator SmoothlyResetVisualsPosition()
     {
         while (beeVisuals.localPosition.sqrMagnitude > 0.0001f)
@@ -149,7 +186,7 @@ public class PassiveBee : MonoBehaviour
         _resetVisualsCoroutine = null;
     }
 
-    // A SOLUÇÃO PARA O MOVIMENTO ERRÁTICO
+    // Coroutine para o efeito de voo estacionário usando Ruído de Perlin
     private IEnumerator HoverCoroutine()
     {
         Vector3 originalPosition = beeVisuals.localPosition;
@@ -158,6 +195,7 @@ public class PassiveBee : MonoBehaviour
         {
             // Usa Ruído de Perlin para um movimento suave e pseudo-aleatório
             float time = Time.time * hoverNoiseSpeed;
+            // Mapeia o resultado de Perlin (0 a 1) para o intervalo de -1 a 1
             float xOffset = (Mathf.PerlinNoise(time, _perlinSeedX) * 2 - 1) * hoverAmount;
             float yOffset = (Mathf.PerlinNoise(time, _perlinSeedY) * 2 - 1) * hoverAmount;
             float zOffset = (Mathf.PerlinNoise(time, _perlinSeedZ) * 2 - 1) * hoverAmount;

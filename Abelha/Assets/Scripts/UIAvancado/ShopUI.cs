@@ -1,6 +1,6 @@
 // Scripts/UI/ShopUI.cs
 using UnityEngine;
-
+using UnityEngine.UI;
 public class ShopUI : MonoBehaviour
 {
     [Header("Painéis da Loja")]
@@ -12,7 +12,26 @@ public class ShopUI : MonoBehaviour
 
     [Tooltip("Um objeto visual (ex: um painel com um cadeado e texto) para mostrar quando as abelhas passivas estão bloqueadas.")]
     public GameObject passiveBeesLockedOverlay; // Opcional
+    [Header("Opções Visuais")]
+    public Toggle showAllBeesToggle;
 
+    void Start() // Se você não tiver um Start, crie um.
+    {
+        if (showAllBeesToggle != null && BeeVisualsManager.Instancia != null)
+        {
+            // Define o estado inicial do toggle e adiciona o listener
+            showAllBeesToggle.isOn = true; // Começa mostrando todas
+            showAllBeesToggle.onValueChanged.AddListener(OnBeeVisualsToggleChanged);
+        }
+    }
+
+    public void OnBeeVisualsToggleChanged(bool showAll)
+    {
+        if (BeeVisualsManager.Instancia != null)
+        {
+            BeeVisualsManager.Instancia.SetVisualsMode(showAll);
+        }
+    }
     void OnEnable()
     {
         // OnEnable é chamado toda vez que o objeto da loja se torna ativo.
