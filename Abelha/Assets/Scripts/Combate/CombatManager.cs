@@ -52,7 +52,7 @@ public class CombatManager : MonoBehaviour
     public CombatResultsUI combatResultsUI; // A
     private List<Combatant3D> _playerCombatants = new List<Combatant3D>();
     private List<Combatant3D> _enemyCombatants = new List<Combatant3D>();
-
+    public int fatorconquista = 0;
     public CombatState currentCombatState { get; private set; } = CombatState.NotActive;
     public bool isCombatActive { get; private set; } = false;
 
@@ -233,9 +233,14 @@ public class CombatManager : MonoBehaviour
 
         Debug.Log(playerWon ? "Jogador VENCEU o combate!" : "Jogador foi DERROTADO.");
 
+        
+        
+        
         if (playerWon && currentOperatingWave != null)
         {
-            if (GerenciadorRecursos.Instancia != null) {
+            if (GerenciadorRecursos.Instancia != null)
+            {
+                fatorconquista = fatorconquista + 1;
                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, currentOperatingWave.honeyReward);
                 Debug.Log($"Recompensa: {currentOperatingWave.honeyReward} de Mel adicionada.");
             }

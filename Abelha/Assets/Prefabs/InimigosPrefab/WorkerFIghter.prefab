@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1763806248720150763}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.61, y: 5.81, z: 1.03}
+  m_LocalPosition: {x: 0.61, y: 7.034133, z: 1.03}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -388,9 +388,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beeTypeName: WorkerBee
-  flower: {fileID: 0}
-  honeycomb: {fileID: 0}
-  hive: {fileID: 0}
   baseCollectionTime: 2
   baseProcessingTime: 2
   baseDepositTime: 2
@@ -662,7 +659,7 @@ Transform:
   m_GameObject: {fileID: 7294344594602815180}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.2241328, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -787,7 +784,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 198a3bf06f3b542469d5de3e21c59d25, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5558674
+      value: 1.78
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 198a3bf06f3b542469d5de3e21c59d25, type: 3}
       propertyPath: m_LocalPosition.z

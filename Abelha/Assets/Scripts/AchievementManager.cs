@@ -43,12 +43,27 @@ public class AchievementManager : MonoBehaviour
         {
             UnlockAchievement(0);
         }
-        
-         //Você pode adicionar outras condições, por exemplo:
-         if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Nectar) >= 5)
-         {
-             UnlockAchievement(1);
-         }
+
+        //Você pode adicionar outras condições, por exemplo:
+        if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Nectar) >= 5)
+        {
+            UnlockAchievement(1);
+        }
+
+        if (CombatManager.Instancia.fatorconquista == 1)
+        {
+            UnlockAchievement(2);
+        }
+
+        if (CombatManager.Instancia.fatorconquista == 2)
+        {
+            UnlockAchievement(3);
+        }
+
+        if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Mel) >= 100)
+        {
+            UnlockAchievement(4);
+        }
     }
 
     // Se você realmente precisar checar no Update, chame o método CheckAchievements,

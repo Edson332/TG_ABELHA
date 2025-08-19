@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic; // Adicionado para usar Listas
 using TMPro;
 
 public class MenuManager : MonoBehaviour
@@ -8,82 +9,91 @@ public class MenuManager : MonoBehaviour
     [Header("Panels")]
     public GameObject mainMenuPanel;
     public GameObject upgradeMenuPanel;
-
     public GameObject upgradeTAB;
-
     public GameObject buyTAB;
+
     [Header("Dependencies")]
     public AchievementManager achievementManager; // Must be assigned in Inspector
-    public GameObject[] achievementPanels;
-
+    
+    // Usar Listas é mais flexível que arrays, mas a lógica é a mesma
+    public List<GameObject> achievementPanels = new List<GameObject>(); 
     [Header("Buttons")]
-    public Button[] menuButtons;
+    public List<Button> menuButtons = new List<Button>();
 
     void Start()
     {
+        // Garante que o achievementManager foi atribuído
+        if (achievementManager == null)
+        {
+            Debug.LogError("AchievementManager não foi atribuído no Inspector do MenuManager!", this);
+            return;
+        }
+
         // Inicializa todos os painéis de achievement como inativos
         foreach (GameObject panel in achievementPanels)
         {
-            panel.SetActive(false);
+            if(panel != null) panel.SetActive(false);
         }
-        
-        // Mostra o menu principal por padrão
-        //ShowMainMenu();
         
         // Configura os listeners dos botões
-        for (int i = 0; i < menuButtons.Length; i++)
+        for (int i = 0; i < menuButtons.Count; i++)
         {
             int index = i; // Importante para o closure
-            menuButtons[i].onClick.AddListener(() => ShowAchievementPanel(index));
+            if(menuButtons[i] != null)
+            {
+                menuButtons[i].onClick.RemoveAllListeners(); // Limpa listeners antigos para segurança
+                menuButtons[i].onClick.AddListener(() => ShowAchievementPanel(index));
+            }
         }
 
-        // Atualiza os botões conforme o status dos achievements
         UpdateMenuButtons();
     }
 
     void Update()
     {
-        // Atualiza os botões periodicamente (ou você pode chamar isso somente quando houver mudança)
+        // O ideal é chamar UpdateMenuButtons apenas quando uma conquista for desbloqueada,
+        // mas por enquanto, manter no Update funciona.
         UpdateMenuButtons();
     }
 
     /// <summary>
-    /// Atualiza a aparência e a interatividade de cada botão com base no achievement correspondente.
-    /// Se o achievement estiver bloqueado, o botão ficará inativo, o texto será "???" e a cor ficará vermelha.
+    /// Atualiza a aparência e a interatividade de cada botão com base na conquista correspondente.
     /// </summary>
     public void UpdateMenuButtons()
     {
-        for (int i = 0; i < menuButtons.Length; i++)
+        for (int i = 0; i < menuButtons.Count; i++)
         {
             if (i < achievementManager.achievements.Length)
             {
                 Achievement achievement = achievementManager.achievements[i];
-                TextMeshProUGUI buttonText = menuButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-                Image buttonImage = menuButtons[i].GetComponent<Image>();
+                Button button = menuButtons[i];
+                
+                if (button == null) continue; // Pula se o botão não estiver na lista
+
+                TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
+                Image buttonImage = button.GetComponent<Image>();
 
                 if (achievement.isUnlocked)
                 {
-                    menuButtons[i].interactable = true;
-                    buttonText.text = achievement.title; // ou outro texto relevante
-                    buttonImage.color = Color.white;
+                    button.interactable = true;
+                    if(buttonText != null) buttonText.text = achievement.title;
+                    if(buttonImage != null) buttonImage.color = Color.white;
                 }
                 else
                 {
-                    menuButtons[i].interactable = false;
-                    buttonText.text = "???";
-                    buttonImage.color = Color.red;
+                    button.interactable = false;
+                    if(buttonText != null) buttonText.text = "???";
+                    if(buttonImage != null) buttonImage.color = Color.grey;
                 }
             }
         }
     }
 
     /// <summary>
-    /// Mostra o painel de achievement correspondente, se o achievement já estiver desbloqueado.
-    /// Caso contrário, exibe uma mensagem informando que ainda não foi alcançado.
+    /// Mostra o painel de conquista correspondente.
     /// </summary>
     public void ShowAchievementPanel(int panelIndex)
     {
-        // Só abre o painel se o achievement estiver desbloqueado
         if (panelIndex >= 0 && panelIndex < achievementManager.achievements.Length)
         {
             if (achievementManager.achievements[panelIndex].isUnlocked)
@@ -92,11 +102,14 @@ public class MenuManager : MonoBehaviour
                 // Desativa todos os painéis
                 foreach (GameObject panel in achievementPanels)
                 {
-                    panel.SetActive(false);
+                    if (panel != null) panel.SetActive(false);
                 }
                 // Ativa o painel correspondente e atualiza a exibição
-                achievementPanels[panelIndex].SetActive(true);
-                UpdateAchievementDisplay(panelIndex);
+                if (panelIndex < achievementPanels.Count && achievementPanels[panelIndex] != null)
+                {
+                    achievementPanels[panelIndex].SetActive(true);
+                    UpdateAchievementDisplay(panelIndex);
+                }
             }
             else
             {
@@ -104,74 +117,79 @@ public class MenuManager : MonoBehaviour
             }
         }
     }
+    
+    // ### MÉTODO CORRIGIDO ###
+    /// <summary>
+    /// Atualiza o conteúdo de um painel de conquista específico.
+    /// </summary>
+    public void UpdateAchievementDisplay(int panelIndex)
+    {
+        Achievement achievement = achievementManager.achievements[panelIndex];
+        GameObject currentPanel = achievementPanels[panelIndex];
+        
+        // Em vez de transform.Find, vamos buscar os componentes em todos os filhos.
+        // Isso é mais robusto e funciona dentro de Scroll Views.
+        
+        TextMeshProUGUI titleText = FindComponentInChild<TextMeshProUGUI>(currentPanel, "Title");
+        TextMeshProUGUI descText = FindComponentInChild<TextMeshProUGUI>(currentPanel, "Description");
+        Image iconImage = FindComponentInChild<Image>(currentPanel, "Icon");
+        
+        if (titleText != null) titleText.text = achievement.title;
+        if (descText != null) descText.text = achievement.description;
+        if (iconImage != null) iconImage.sprite = achievement.icon;
+        
+        // Alterar a cor de fundo do painel conforme o status
+        Image panelImage = currentPanel.GetComponent<Image>();
+        if(panelImage != null)
+            panelImage.color = achievement.isUnlocked ? Color.white : Color.gray;
+    }
 
+    /// <summary>
+    /// Método auxiliar genérico para encontrar um componente em um filho com um nome específico.
+    /// </summary>
+    private T FindComponentInChild<T>(GameObject parent, string childName) where T : Component
+    {
+        T[] components = parent.GetComponentsInChildren<T>(true);
+        foreach (T component in components)
+        {
+            if (component.gameObject.name == childName)
+            {
+                return component;
+            }
+        }
+        Debug.LogWarning($"Não foi possível encontrar o componente '{typeof(T).Name}' no objeto filho chamado '{childName}' dentro de '{parent.name}'");
+        return null;
+    }
+
+    // --- Seus outros métodos de UI (sem alterações) ---
     public void ShowMainMenu()
     {
         mainMenuPanel.SetActive(true);
         foreach (GameObject panel in achievementPanels)
         {
-            panel.SetActive(false);
+            if(panel != null) panel.SetActive(false);
         }
     }
-
-       public void ShowUpgradeMenu()
+    public void ShowUpgradeMenu()
     {
-        if (upgradeMenuPanel.activeSelf)
-        {
-            upgradeMenuPanel.SetActive(false);
-        } else
-        {
-            upgradeMenuPanel.SetActive(true);
-        }
-        
-
+        if (upgradeMenuPanel != null)
+            upgradeMenuPanel.SetActive(!upgradeMenuPanel.activeSelf);
     }
-
-
-           public void ShowUpgradeTAB()
-        {
-            if (upgradeTAB.activeSelf)
-            {
-                upgradeTAB.SetActive(false);
-            } else
-            {
-                upgradeTAB.SetActive(true);
-                buyTAB.SetActive(false);
-            }
-        
-        }
-
-
-        public void ShowBuyTAB()
-        {
-            if (buyTAB.activeSelf)
-            {
-                buyTAB.SetActive(false);
-            } else
-            {
-                buyTAB.SetActive(true);
-                upgradeTAB.SetActive(false);
-            }
-        
-        }
-
-
-    public void UpdateAchievementDisplay(int panelIndex)
+    public void ShowUpgradeTAB()
     {
-        Achievement achievement = achievementManager.achievements[panelIndex];
-        
-        // Substitua o GetComponent<Text>() por GetComponent<TextMeshProUGUI>()
-        TextMeshProUGUI titleText = achievementPanels[panelIndex].transform.Find("Title").GetComponent<TextMeshProUGUI>();
-        TextMeshProUGUI descText = achievementPanels[panelIndex].transform.Find("Description").GetComponent<TextMeshProUGUI>();
-        Image iconImage = achievementPanels[panelIndex].transform.Find("Icon").GetComponent<Image>();
-        
-        titleText.text = achievement.title;
-        descText.text = achievement.description;
-        iconImage.sprite = achievement.icon;
-        
-        // Alterar a cor de fundo do painel conforme o status
-        achievementPanels[panelIndex].GetComponent<Image>().color = 
-            achievement.isUnlocked ? Color.white : Color.gray;
+        if (upgradeTAB != null)
+        {
+            upgradeTAB.SetActive(true);
+            if (buyTAB != null) buyTAB.SetActive(false);
+        }
+    }
+    public void ShowBuyTAB()
+    {
+        if (buyTAB != null)
+        {
+            buyTAB.SetActive(true);
+            if (upgradeTAB != null) upgradeTAB.SetActive(false);
+        }
     }
     public void BackToMainMenu()
     {

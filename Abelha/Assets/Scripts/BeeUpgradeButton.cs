@@ -33,6 +33,12 @@ public class BeeUpgradeButton : MonoBehaviour
         }
     }
 
+    public void OnBuyAsiaticaBeeClicked()
+    {
+        bool comprou = BeeManager.Instancia.TrySpawnBee("AsiaticaBee");
+        if (!comprou) { Debug.Log("Não foi possível comprar AsiaticaBee."); }
+    }
+
     public void OnBuyEuropaBeeClicked()
     {
         bool comprou = BeeManager.Instancia.TrySpawnBee("EuropaBee");
