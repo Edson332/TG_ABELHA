@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a2eec1e63dbbe4a4eb58c83d9f95d2d2, type: 3}
-  m_Name: NovoEnemyCombatData
+  m_Name: Formiga2
   m_EditorClassIdentifier: 
-  combatantName: EnemyBee
+  combatantName: FormigaTropa2
   icon: {fileID: 21300000, guid: 9a12e8f0262f5414799420a815811317, type: 3}
-  modelPrefab3D: {fileID: 5664306715742136241, guid: 0714ea7a49512b144a2f80a4af4802c3, type: 3}
-  baseMaxHP: 100
-  baseAttack: 10
-  attackInterval: 2
+  modelPrefab3D: {fileID: 6928395985099705891, guid: 26c1a0e91a80ac845958a3ae28ad8377, type: 3}
+  baseMaxHP: 50
+  baseAttack: 30
+  attackInterval: 1

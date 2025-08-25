@@ -21403,8 +21403,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   possibleInvasionWaves:
-  - {fileID: 11400000, guid: 38c9f39b7be0e0543bbf023555bd881b, type: 2}
+  - {fileID: 11400000, guid: 168f6f3d1132712498cb1c52a5ca1663, type: 2}
   - {fileID: 11400000, guid: a15c684f99aed294dbd6ac8b07031a37, type: 2}
+  - {fileID: 11400000, guid: 38c9f39b7be0e0543bbf023555bd881b, type: 2}
   minTimeBetweenInvasions: 60
   maxTimeBetweenInvasions: 120
   initialDelay: 20
