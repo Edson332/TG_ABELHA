@@ -52,13 +52,9 @@ public class MenuPausa : MonoBehaviour
             SaveLoadManager.Instancia.SaveGameData();
         }
 
-        Debug.Log("O JOGO FOI FECHADO!");
-        Application.Quit();
+        SceneManager.LoadScene("Menu");
 
-        // Código para parar o Play Mode no Editor da Unity
-        #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+    
     }
 
     // --- NOVO MÉTODO ---

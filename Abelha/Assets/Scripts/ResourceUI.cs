@@ -51,7 +51,7 @@ public class RecursosUI : MonoBehaviour
         }
 
         if (melProcessadoText != null) {
-            melProcessadoText.text = $"Processado: {melProcessadoValor.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}";
+            melProcessadoText.text = $"Processando: {melProcessadoValor.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}";
         }
 
          if (melText != null) {

@@ -5322,18 +5322,28 @@ MonoBehaviour:
     prefab: {fileID: 934013092}
     cost: 2
     maxCount: 3
+    displayName: 
+    incomePerSecond: 0
     currentCount: 0
+    isPrimary: 0
   - beeType: ProducerBee
     prefab: {fileID: 16653817}
     cost: 2
     maxCount: 3
+    displayName: 
+    incomePerSecond: 0
     currentCount: 0
+    isPrimary: 0
   - beeType: QueenBee
     prefab: {fileID: 2730828899073066675, guid: da20a4e18a0a0b147aac5ecd4fd73f67, type: 3}
     cost: 2
     maxCount: 1
+    displayName: 
+    incomePerSecond: 0
     currentCount: 0
+    isPrimary: 0
   spawnPoint: {fileID: 90610521}
+  spawnRadius: 1.5
   minInitialDelay: 0.5
   maxInitialDelay: 2
 --- !u!114 &701634921
@@ -6716,6 +6726,8 @@ MonoBehaviour:
   testPlayerSquadData:
   - {fileID: 11400000, guid: 499b5e67e9a04204f8057d806072d65b, type: 2}
   testWaveToUse: {fileID: 11400000, guid: a15c684f99aed294dbd6ac8b07031a37, type: 2}
+  combatResultsUI: {fileID: 0}
+  fatorconquista: 0
 --- !u!4 &930984955 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 296d447c5b455be4887843029e013e42, type: 3}
@@ -9530,17 +9542,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1357887680}
   m_CullTransparentMesh: 1
---- !u!114 &1359826769 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4578023353460327409, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
-  m_PrefabInstance: {fileID: 1966347469}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1362447931
 GameObject:
   m_ObjectHideFlags: 0
@@ -10057,6 +10058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e65a7581780358743884deaf64fe3697, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  primeiroMelTutorial: {fileID: 0}
 --- !u!1001 &1401417234
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14539,6 +14541,30 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1975472262923488627, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1975472262923488627, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1975472262923488627, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1975472262923488627, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1975472262923488627, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1975472262923488627, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4578023353460327409, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
       propertyPath: m_FontData.m_BestFit
       value: 0
@@ -14683,6 +14709,30 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6222481327957111909, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6222481327957111909, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6222481327957111909, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6222481327957111909, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6222481327957111909, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6222481327957111909, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6365558281588120150, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -14766,7 +14816,7 @@ PrefabInstance:
     - target: {fileID: 8660671161868179240, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
       propertyPath: mText
       value: 
-      objectReference: {fileID: 1359826769}
+      objectReference: {fileID: 0}
     - target: {fileID: 8660671161868179240, guid: fb89159b2e1bd3e46aaf286e0c899a09, type: 3}
       propertyPath: mCornerImage
       value: 
@@ -16007,6 +16057,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectionPanel: {fileID: 1299827724}
   maxSquadSize: 3
+  squadSelectionTutorial: {fileID: 0}
   availableBeesContent: {fileID: 1940830897}
   beeSelectionEntryPrefab: {fileID: 9052500047648616641, guid: d8490ce3db1b7e14fbe5914226b49b9b, type: 3}
   selectedSquadSlots:
@@ -16014,7 +16065,7 @@ MonoBehaviour:
   - {fileID: 1969644475}
   - {fileID: 348708722}
   fightButton: {fileID: 1188907708}
-  squadSizeText: {fileID: 323734581}
+  squadSizeText: {fileID: 0}
 --- !u!224 &2135760956
 RectTransform:
   m_ObjectHideFlags: 0
