@@ -13,6 +13,7 @@ public class Achievement
 
 public class AchievementManager : MonoBehaviour
 {
+
     public Achievement[] achievements;
     
     /// <summary>
@@ -32,12 +33,17 @@ public class AchievementManager : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// Método para checar as condições de desbloqueio dos achievements.
     /// Esse método pode ser chamado a partir de eventos do jogo ou periodicamente.
     /// </summary>
     public void CheckAchievements()
     {
+
+        int statusDaRainha = PlayerPrefs.GetInt("QueenPurchased", 0);
+        int statusDaGuarda = PlayerPrefs.GetInt("GuardPurchased", 0);
+
         // Exemplo: se houver pelo menos 2 unidades de Mel Processado, desbloqueia o achievement de índice 1.
         if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Mel) >= 2)
         {
@@ -64,10 +70,21 @@ public class AchievementManager : MonoBehaviour
         {
             UnlockAchievement(4);
         }
+
+        if (statusDaRainha == 1)
+        {
+            UnlockAchievement(5);
+        }
+
+        if (statusDaGuarda == 1)
+        {
+            UnlockAchievement(6);
+        }
+
+
     }
 
-    // Se você realmente precisar checar no Update, chame o método CheckAchievements,
-    // mas considere disparar essa verificação a partir de eventos específicos.
+
     void Update()
     {
         CheckAchievements();

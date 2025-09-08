@@ -48,26 +48,27 @@ public class BuyBeeTooltipTrigger : MonoBehaviour
         var beeData = BeeManager.Instancia.beeTypes.Find(b => b.beeType == targetBeeType);
         if (beeData == null)
         {
-            // Se os dados não forem encontrados, não faz nada para evitar erros.
-            // O ideal é garantir que o targetBeeType esteja sempre correto no Inspector.
+            _tooltipTrigger.SetTooltipContent("", "");
             return;
         }
 
-        // --- Monta o Texto do Header ---
+        // --- LÓGICA DE CUSTO MODIFICADA ---
+        double currentCost = BeeManager.Instancia.GetCurrentBeeCost(targetBeeType);
+        // --- FIM DA MODIFICAÇÃO ---
+        
         string headerText = beeData.displayName;
 
-        // --- Monta o Texto do Corpo ---
         _stringBuilder.Clear();
-        _stringBuilder.AppendLine($"<color=#FFD700>Custo:</color> {beeData.cost} Mel");
+        // Usa o custo calculado e o formata como número inteiro (F0)
+        _stringBuilder.AppendLine($"<color=#FFD700>Custo:</color> {currentCost:F0} Mel");
         _stringBuilder.AppendLine($"Possui: {beeData.currentCount} / {beeData.maxCount}");
 
         if (beeData.incomePerSecond > 0)
         {
-            _stringBuilder.AppendLine(); // Espaçamento
+            _stringBuilder.AppendLine();
             _stringBuilder.AppendLine($"Gera: <color=#32CD32>{beeData.incomePerSecond:F1} Mel/s</color>");
         }
-
-        // --- Atualiza o Conteúdo do TooltipTrigger ---
+        
         _tooltipTrigger.SetTooltipContent(_stringBuilder.ToString(), headerText);
     }
 }

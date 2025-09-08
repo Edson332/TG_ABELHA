@@ -3,33 +3,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI; // Necessário para NavMesh.SamplePosition
 
+
 public class BeeManager : MonoBehaviour
 {
     public static BeeManager Instancia;
 
+    
     [System.Serializable]
-    public class BeeData
+  public class BeeData
     {
         [Tooltip("Nome único do tipo de abelha (ex: WorkerBee, ProducerBee)")]
         public string beeType;
         [Tooltip("Prefab que será instanciado ao comprar esta abelha")]
         public GameObject prefab;
-        [Tooltip("Custo em Mel para comprar uma unidade")]
-        public int cost;
+        
+        // --- CAMPOS MODIFICADOS/ADICIONADOS ---
+        [Tooltip("O custo para comprar a PRIMEIRA abelha deste tipo.")]
+        public int baseCost; // RENOMEADO de 'cost'
+        [Tooltip("O fator pelo qual o custo aumenta a cada compra. Ex: 1.07 = 7% de aumento.")]
+        public float costMultiplier = 1.07f; // ADICIONADO (1.07 é um bom valor inicial)
+        // --- FIM DAS MUDANÇAS ---
+
         [Tooltip("Quantidade máxima de unidades que o jogador pode ter")]
         public int maxCount;
-
         [Tooltip("Nome de exibição para a UI (ex: Abelha Trabalhadora).")]
         public string displayName;
         [Tooltip("Para abelhas passivas, a quantidade de Mel que geram por segundo. Deixe 0 para outras.")]
         public float incomePerSecond = 0f;
+        [Tooltip("Marque esta opção se esta for uma das abelhas primárias (Worker, Producer, Guard).")]
+        public bool isPrimary = false;
+        
         [HideInInspector]
         public int currentCount;
-
-        [Tooltip("Marque esta opção se esta for uma das abelhas primárias (Worker, Producer, Guard).")]
-        public bool isPrimary = false; 
-        
     }
+
 
     [Header("Configuração de tipos de abelha")]
     public List<BeeData> beeTypes = new List<BeeData>();
@@ -49,6 +56,18 @@ public class BeeManager : MonoBehaviour
             Destroy(gameObject);
     }
 
+    public double GetCurrentBeeCost(string beeType)
+    {
+        var data = beeTypes.Find(b => b.beeType == beeType);
+        if (data == null)
+        {
+            return double.MaxValue; // Retorna um valor enorme se o tipo não for encontrado
+        }
+
+        // Fórmula: Custo Atual = Custo Base * (Multiplicador ^ Quantidade Atual)
+        // Usamos double para lidar com números potencialmente muito grandes no futuro.
+        return data.baseCost * System.Math.Pow(data.costMultiplier, data.currentCount);
+    }
     /// <summary>
     /// Tenta comprar e spawnar uma abelha do tipo especificado.
     /// </summary>
@@ -73,7 +92,7 @@ public class BeeManager : MonoBehaviour
         // Se o loop terminar sem retornar falso, significa que todas as primárias foram compradas.
         return true;
     }
-    public bool TrySpawnBee(string beeType)
+ public bool TrySpawnBee(string beeType)
     {
         var data = beeTypes.Find(b => b.beeType == beeType);
         if (data == null)
@@ -84,28 +103,50 @@ public class BeeManager : MonoBehaviour
 
         if (data.currentCount >= data.maxCount)
         {
-            Debug.Log($"[BeeManager] Limite de {beeType} atingido ({data.currentCount}/{data.maxCount}).");
+            Debug.Log($"[BeeManager] Limite de {beeType} atingido.");
             return false;
         }
 
-        if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Mel) < data.cost)
+        // --- LÓGICA DE CUSTO MODIFICADA ---
+        double currentCost = GetCurrentBeeCost(beeType);
+
+        if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Mel) < currentCost)
         {
-            Debug.Log("[BeeManager] Mel insuficiente para compra.");
+            Debug.Log($"[BeeManager] Mel insuficiente para comprar {beeType}. Custo: {currentCost:F0}");
             return false;
         }
+        // --- FIM DA MODIFICAÇÃO ---
 
-        // --- LÓGICA DE SPAWN COM RAIO (APLICADA AQUI) ---
         Vector3 spawnPosition = GetRandomSpawnPosition();
-        // --- FIM DA LÓGICA DE SPAWN COM RAIO ---
 
-        // Remove o custo e instancia a abelha na posição calculada
-        GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Mel, data.cost);
+        // Remove o custo dinâmico e instancia a abelha
+        GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Mel, (float)currentCost);
         var newBee = Instantiate(data.prefab, spawnPosition, spawnPoint.rotation);
         
-        // Aplica o delay inicial
         ApplyInitialDelay(newBee, beeType);
 
         data.currentCount++;
+        
+
+        if (data.beeType == "QueenBee")
+        {
+            // PlayerPrefs salva um par de "chave" e "valor" no dispositivo.
+            // A chave é "QueenPurchased", o valor é 1.
+            PlayerPrefs.SetInt("QueenPurchased", 1);
+            PlayerPrefs.Save(); // Força o salvamento imediato no disco.
+            Debug.Log("FLAG SALVA: O status da Abelha Rainha foi salvo como 1.");
+        }
+
+        if (data.beeType == "GuardBee")
+        {
+            // PlayerPrefs salva um par de "chave" e "valor" no dispositivo.
+            // A chave é "QueenPurchased", o valor é 1.
+            PlayerPrefs.SetInt("GuardPurchased", 1);
+            PlayerPrefs.Save(); // Força o salvamento imediato no disco.
+            Debug.Log("FLAG SALVA: O status da Abelha Guarda foi salvo como 1.");
+        }
+        // Anuncia a mudança na contagem para o sistema de achievements, etc.
+
         return true;
     }
 

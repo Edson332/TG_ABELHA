@@ -81,6 +81,10 @@ public class MenuPausa : MonoBehaviour
             Debug.LogWarning("GerenciadorUpgrades não encontrado para resetar os dados de upgrade em memória. Se a cena for recarregada, eles podem persistir.");
         }
 
+        PlayerPrefs.DeleteKey("QueenPurchased");
+        PlayerPrefs.DeleteKey("GuardPurchased");
+        // Ou, para limpar TODOS os PlayerPrefs: PlayerPrefs.DeleteAll();
+        Debug.Log("PlayerPrefs resetados.");
         // 3. Recarrega a cena atual para resetar todos os MonoBehaviours e começar do zero.
         Debug.Log("Recarregando a cena para finalizar o reset...");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
