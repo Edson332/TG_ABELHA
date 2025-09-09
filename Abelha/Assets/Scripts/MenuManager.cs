@@ -20,6 +20,9 @@ public class MenuManager : MonoBehaviour
     [Header("Buttons")]
     public List<Button> menuButtons = new List<Button>();
 
+    [Header("Notifications")]
+    public GameObject achievementNotificationSymbol;
+
     void Start()
     {
         // Garante que o achievementManager foi atribuído
@@ -51,9 +54,18 @@ public class MenuManager : MonoBehaviour
 
     void Update()
     {
-        // O ideal é chamar UpdateMenuButtons apenas quando uma conquista for desbloqueada,
-        // mas por enquanto, manter no Update funciona.
+
         UpdateMenuButtons();
+
+        if (achievementManager != null && achievementNotificationSymbol != null)
+        {
+            // Mostra o símbolo se houver conquistas novas, esconde se não houver.
+            bool shouldShowNotification = achievementManager.HasUnviewedAchievements();
+            if (achievementNotificationSymbol.activeSelf != shouldShowNotification)
+            {
+                achievementNotificationSymbol.SetActive(shouldShowNotification);
+            }
+        }
     }
 
     /// <summary>
@@ -98,6 +110,9 @@ public class MenuManager : MonoBehaviour
         {
             if (achievementManager.achievements[panelIndex].isUnlocked)
             {
+
+                achievementManager.achievements[panelIndex].hasBeenViewed = true;
+                Debug.Log($"Conquista '{achievementManager.achievements[panelIndex].title}' marcada como vista.");
                 mainMenuPanel.SetActive(false);
                 // Desativa todos os painéis
                 foreach (GameObject panel in achievementPanels)

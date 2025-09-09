@@ -7838,7 +7838,6 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 562993211}
   - {fileID: 852687814}
   - {fileID: 1839857322}
   - {fileID: 1764334879}
@@ -7849,6 +7848,7 @@ RectTransform:
   - {fileID: 1160703773}
   - {fileID: 2135760956}
   - {fileID: 1299827725}
+  - {fileID: 562993211}
   - {fileID: 497755622}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7901,6 +7901,7 @@ MonoBehaviour:
     description: altas coisas loucas
     icon: {fileID: 0}
     isUnlocked: 0
+    hasBeenViewed: 0
 --- !u!114 &701634920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20019,6 +20020,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 214133792}
+  - {fileID: 1871380898}
   m_Father: {fileID: 701634916}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -20072,6 +20074,7 @@ MonoBehaviour:
   - {fileID: 1643113313}
   - {fileID: 838383967}
   - {fileID: 934519306}
+  achievementNotificationSymbol: {fileID: 1871380897}
 --- !u!114 &1764334884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20091,6 +20094,7 @@ MonoBehaviour:
       em favos servindo de alimento para os insetos."
     icon: {fileID: 21300000, guid: 3a27ea8adec4a5841ad76f606d1e5b43, type: 3}
     isUnlocked: 0
+    hasBeenViewed: 0
   - title: Progresso
     description: "O n\xE9ctar \xE9 uma solu\xE7\xE3o a\xE7ucarada produzida pelas
       plantas, principalmente pelas flores, para atrair polinizadores como as abelhas.
@@ -20101,6 +20105,7 @@ MonoBehaviour:
       as flores. "
     icon: {fileID: 21300000, guid: 8e0393d71fe07e348ab786015e17ef22, type: 3}
     isUnlocked: 0
+    hasBeenViewed: 0
   - title: Defesa - 1
     description: "As abelhas, sejam elas com ou sem ferr\xE3o, empregam uma s\xE9rie
       de estrat\xE9gias sofisticadas e coordenadas para defender suas colmeias contra
@@ -20110,6 +20115,7 @@ MonoBehaviour:
       at\xE9 ataques em massa e comportamentos suicidas."
     icon: {fileID: 21300000, guid: 3a27ea8adec4a5841ad76f606d1e5b43, type: 3}
     isUnlocked: 0
+    hasBeenViewed: 0
   - title: Defesa - 2
     description: "A prote\xE7\xE3o da colmeia come\xE7a na entrada, onde abelhas-guarda
       atuam como sentinelas vigilantes. Elas inspecionam todos os insetos que tentam
@@ -20122,6 +20128,7 @@ MonoBehaviour:
       o tamanho do t\xFAnel de entrada, dificultando a passagem de predadores maiores."
     icon: {fileID: 21300000, guid: 3a27ea8adec4a5841ad76f606d1e5b43, type: 3}
     isUnlocked: 0
+    hasBeenViewed: 0
   - title: Abelhas
     description: "O n\xE9ctar \xE9 uma solu\xE7\xE3o a\xE7ucarada produzida pelas
       plantas, principalmente pelas flores, para atrair polinizadores como as abelhas.
@@ -20132,6 +20139,7 @@ MonoBehaviour:
       as flores. "
     icon: {fileID: 21300000, guid: 8e0393d71fe07e348ab786015e17ef22, type: 3}
     isUnlocked: 0
+    hasBeenViewed: 0
   - title: Abelha R.
     description: "A abelha rainha \xE9 a \xFAnica f\xEAmea com capacidade reprodutiva
       e a l\xEDder de uma colmeia. Sua fun\xE7\xE3o principal \xE9 botar todos os
@@ -20143,6 +20151,7 @@ MonoBehaviour:
       e crescimento."
     icon: {fileID: 21300000, guid: 29048da62084fa748b69a2e10e34df78, type: 3}
     isUnlocked: 0
+    hasBeenViewed: 0
   - title: Abelha G.
     description: "As abelhas guardas s\xE3o abelhas oper\xE1rias mais velhas que,
       em sua \xFAltima fase de vida, se dedicam a proteger a colmeia. Elas ficam
@@ -20152,6 +20161,7 @@ MonoBehaviour:
       Seus ferr\xF5es s\xE3o sua principal ferramenta de defesa."
     icon: {fileID: 21300000, guid: d2ca9db282208d944a5eb518ecca5fb3, type: 3}
     isUnlocked: 0
+    hasBeenViewed: 0
 --- !u!1 &1766679420
 GameObject:
   m_ObjectHideFlags: 0
@@ -21140,6 +21150,81 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5d0e9c04d840d943bce3c2dafc65da5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1871380897
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1871380898}
+  - component: {fileID: 1871380900}
+  - component: {fileID: 1871380899}
+  m_Layer: 5
+  m_Name: notification
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1871380898
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871380897}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
+  m_LocalScale: {x: 1.321788, y: 1.3217878, z: 1.3217878}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1764334879}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -309, y: -170}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1871380899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871380897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 17ce495f54f89124da781c73dbd1ed24, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1871380900
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871380897}
+  m_CullTransparentMesh: 1
 --- !u!1 &1879155311
 GameObject:
   m_ObjectHideFlags: 0
@@ -21720,8 +21805,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 09c142fa2eea16b469119d500964989a, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -22532,8 +22617,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 9ede5e25da8ae8f41953c880b0aac1e6, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

@@ -8,6 +8,8 @@ public class Achievement
     public string description;
     public Sprite icon;
     public bool isUnlocked;
+
+    public bool hasBeenViewed;
     // public float progress; // 0-1 for progress bars (opcional)
 }
 
@@ -19,21 +21,34 @@ public class AchievementManager : MonoBehaviour
     /// <summary>
     /// Desbloqueia o achievement no índice especificado, se ainda não estiver desbloqueado.
     /// </summary>
-    public void UnlockAchievement(int index)
+public void UnlockAchievement(int index)
+{
+    if (index >= 0 && index < achievements.Length)
     {
-        if (index >= 0 && index < achievements.Length)
+        if (!achievements[index].isUnlocked)
         {
-            // Se ainda não estiver desbloqueado, marca como desbloqueado e dispara uma notificação (por exemplo, log ou animação)
-            if (!achievements[index].isUnlocked)
-            {
-                achievements[index].isUnlocked = true;
-                Debug.Log("Achievement desbloqueado: " + achievements[index].title);
-                // Aqui você pode disparar uma notificação na UI, salvar o progresso, etc.
-            }
+            achievements[index].isUnlocked = true;
+            achievements[index].hasBeenViewed = false; // <<<--- ADICIONE ESTA LINHA
+            Debug.Log("Achievement desbloqueado: " + achievements[index].title);
+            // Aqui você pode disparar uma notificação na UI, salvar o progresso, etc.
         }
     }
+}
 
-
+    public bool HasUnviewedAchievements()
+    {
+        foreach (Achievement ach in achievements)
+        {
+            // Se encontrarmos UMA conquista que está desbloqueada E não foi vista,
+            // já podemos retornar true.
+            if (ach.isUnlocked && !ach.hasBeenViewed)
+            {
+                return true;
+            }
+        }
+        // Se o loop terminar, significa que não há nenhuma nova para ver.
+        return false;
+    }
     /// <summary>
     /// Método para checar as condições de desbloqueio dos achievements.
     /// Esse método pode ser chamado a partir de eventos do jogo ou periodicamente.
