@@ -15,7 +15,7 @@ MonoBehaviour:
   combatantName: 
   beeTypeName: WorkerBee
   nivelNectarColetado: 0
-  nivelMelProduzido: 0
+  nivelMelProduzido: 10
   nivelVelocidade: 0
   nivelVidaCombate: 0
   nivelAtaqueCombate: 0
