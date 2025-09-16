@@ -24,8 +24,14 @@ public class Combatant3D : MonoBehaviour
     [Tooltip("Tempo para o objeto ser desativado/destruído após a 'morte'.")]
     public float deathEffectDelay = 1.5f;
 
+    [Header("Visual Feedback")]
+    public GameObject damageTextPrefab; // Arraste o DamageText_Prefab aqui
+    public Transform damageTextSpawnPoint; // Ponto de onde o texto aparece (pode ser o HealthBarAnchor)
+    public Renderer beeModelRenderer; // Arraste o Mesh Renderer do seu modelo 3D aqui
+
+
     private Camera _activeCombatCamera; // Câmera de combate ativa, passada pelo CombatManager
-    // private Animator _animator; // Descomente quando adicionar animações
+    private Transform _worldSpaceCanvas;
 
     void Awake()
     {
@@ -61,7 +67,8 @@ public class Combatant3D : MonoBehaviour
     /// Inicializa os status do combatente. Chamado pelo CombatManager ao criar a instância.
     /// </summary>
     public void Initialize(string name, int calculatedMaxHP, int calculatedAttackPower, bool isPlayer,
-                           Slider uiSliderInstance, GameObject uiCanvasElementInstance, Camera activeCombatCam)
+                           Slider uiSliderInstance, GameObject uiCanvasElementInstance, Camera activeCombatCam,
+                           Transform canvasTransform)
     {
         combatantName = name;
         // Define o nome do GameObject na hierarquia para fácil identificação durante o debug
@@ -71,6 +78,7 @@ public class Combatant3D : MonoBehaviour
         attackPower = calculatedAttackPower;
         isPlayerTeam = isPlayer;
         _activeCombatCamera = activeCombatCam; // Recebe a câmera de combate ativa
+        _worldSpaceCanvas = canvasTransform; 
 
         // Atribui as instâncias da UI de vida passadas pelo CombatManager
         healthBarSlider = uiSliderInstance;
@@ -109,18 +117,81 @@ public class Combatant3D : MonoBehaviour
     /// </summary>
     public void TakeDamage(int damageAmount)
     {
-        if (!IsAlive()) return; // Já está morto, não pode tomar mais dano
+        if (!IsAlive()) return; 
 
         currentHP -= damageAmount;
-        currentHP = Mathf.Max(currentHP, 0); // Garante que o HP não fique negativo
+        currentHP = Mathf.Max(currentHP, 0); 
+        
+        // --- ADICIONE A CHAMADA DA CÂMERA AQUI ---
+        if (CombatCameraController.Instancia != null)
+        {
+            // Chama o shake com duração de 0.15s e magnitude de 0.1
+            // Você pode ajustar esses valores!
+            CombatCameraController.Instancia.Shake(0.15f, 0.1f);
+        }
+        // --- FIM DA ADIÇÃO ---
 
-        // Debug.Log($"{combatantName} tomou {damageAmount} de dano, HP restante: {currentHP}");
+        ShowDamageFeedback(damageAmount);
+
         UpdateHealthBarVisuals();
-        // _animator?.SetTrigger("Hit"); // Descomente quando tiver animação de tomar dano
-
         if (!IsAlive())
         {
             Die();
+        }
+    }
+
+    private void ShowDamageFeedback(int damage)
+{
+    // Cria o texto de dano flutuante
+        if (damageTextPrefab != null && damageTextSpawnPoint != null && _worldSpaceCanvas != null)
+        {
+            // --- CORREÇÃO AQUI ---
+            // Usa a variável _worldSpaceCanvas que guardamos
+            GameObject textInstance = Instantiate(damageTextPrefab, damageTextSpawnPoint.position, Quaternion.identity, _worldSpaceCanvas);
+            textInstance.GetComponent<DamageText>()?.SetText(damage.ToString());
+        }
+
+        // Inicia a coroutine do "flash" de dano
+        if (beeModelRenderer != null)
+        {
+            StartCoroutine(DamageFlashCoroutine());
+        }
+}
+
+ private IEnumerator DamageFlashCoroutine()
+    {
+        if (beeModelRenderer == null) yield break;
+
+        // Guarda as cores originais de TODOS os materiais
+        Material[] allMaterials = beeModelRenderer.materials;
+        Color[] originalColors = new Color[allMaterials.Length];
+        for (int i = 0; i < allMaterials.Length; i++)
+        {
+            // Verifica se o material suporta a propriedade de cor antes de tentar acessá-la
+            if (allMaterials[i].HasProperty("_Color"))
+            {
+                originalColors[i] = allMaterials[i].color;
+            }
+        }
+
+        // Aplica a cor de "flash" a todos os materiais
+        foreach (var material in allMaterials)
+        {
+            if (material.HasProperty("_Color"))
+            {
+                material.color = Color.red;
+            }
+        }
+
+        yield return new WaitForSeconds(0.1f);
+
+        // Restaura as cores originais de todos os materiais
+        for (int i = 0; i < allMaterials.Length; i++)
+        {
+            if (allMaterials[i].HasProperty("_Color"))
+            {
+                allMaterials[i].color = originalColors[i];
+            }
         }
     }
 

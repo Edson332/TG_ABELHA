@@ -362,7 +362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4535578467073156937
 Transform:
   m_ObjectHideFlags: 0
@@ -720,15 +720,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3817780984722793779, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.18
+      value: 9.06
       objectReference: {fileID: 0}
     - target: {fileID: 3817780984722793779, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.88
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 3817780984722793779, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -7.2
+      value: -0.01
       objectReference: {fileID: 0}
     - target: {fileID: 3817780984722793779, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
       propertyPath: m_LocalRotation.w
@@ -764,8 +764,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4589356279882121097, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6554937926133791932, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 0a90afdb8cb0a514b8b6f400b0039c5d, type: 2}
+    - target: {fileID: 6554937926133791932, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
+      propertyPath: 'm_Materials.Array.data[2]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 0a90afdb8cb0a514b8b6f400b0039c5d, type: 2}
+    - target: {fileID: 6554937926133791932, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
+      propertyPath: 'm_Materials.Array.data[3]'
+      value: 
+      objectReference: {fileID: 2100000, guid: b29e993469a118c46bbf46110f47dcaa, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -460,6 +460,9 @@ MonoBehaviour:
   healthBarCanvasElement: {fileID: 0}
   healthBarAnchor: {fileID: 6607478843107057819}
   deathEffectDelay: 1.5
+  damageTextPrefab: {fileID: 9095407821250932517, guid: 8004cccc017c04c44b69a278a12251cd, type: 3}
+  damageTextSpawnPoint: {fileID: 6607478843107057819}
+  beeModelRenderer: {fileID: 7340232084177888803}
 --- !u!1 &6641221490474682266
 GameObject:
   m_ObjectHideFlags: 0
@@ -860,5 +863,10 @@ Animator:
 --- !u!4 &851484846127398828 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 198a3bf06f3b542469d5de3e21c59d25, type: 3}
+  m_PrefabInstance: {fileID: 890496158339717191}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &7340232084177888803 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7603786706384944740, guid: 198a3bf06f3b542469d5de3e21c59d25, type: 3}
   m_PrefabInstance: {fileID: 890496158339717191}
   m_PrefabAsset: {fileID: 0}

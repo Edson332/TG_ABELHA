@@ -56,6 +56,11 @@ public class CombatManager : MonoBehaviour
     public CombatState currentCombatState { get; private set; } = CombatState.NotActive;
     public bool isCombatActive { get; private set; } = false;
 
+    [Header("Visuals")]
+    public GameObject projectilePrefab;
+
+    
+
     void Awake()
     {
         if (Instancia != null && Instancia != this)
@@ -163,9 +168,8 @@ public class CombatManager : MonoBehaviour
         }
     }
 
-    private IEnumerator ExecuteTurn(List<Combatant3D> attackers, List<Combatant3D> defenders, bool isPlayerAttacking)
+   private IEnumerator ExecuteTurn(List<Combatant3D> attackers, List<Combatant3D> defenders, bool isPlayerAttacking)
     {
-        string turnPrefix = isPlayerAttacking ? "Jogador:" : "Inimigo:";
         for (int i = 0; i < attackers.Count; i++)
         {
             Combatant3D attacker = attackers[i];
@@ -174,23 +178,30 @@ public class CombatManager : MonoBehaviour
                 Combatant3D target = FindTargetFor(attacker, defenders);
                 if (target != null)
                 {
-                    attacker.PerformAttackAction(target);
-                    // Sem animação, o dano pode ser "instantâneo" ou com um pequeno delay
-                    yield return new WaitForSeconds(actionDelayBetweenAttacks * 0.5f); 
-                    target.TakeDamage(attacker.attackPower);
-                    yield return new WaitForSeconds(actionDelayBetweenAttacks * 0.5f); 
+                    attacker.PerformAttackAction(target); // A abelha se vira para o alvo
 
-                    if (!target.IsAlive())
+                    // --- NOVA LÓGICA DE PROJÉTIL ---
+                    if (projectilePrefab != null)
                     {
-                        Debug.Log($"{turnPrefix} {target.combatantName} foi derrotado!");
+                        GameObject projGO = Instantiate(projectilePrefab, attacker.transform.position, Quaternion.identity);
+                        Projectile proj = projGO.GetComponent<Projectile>();
+                        if(proj != null)
+                        {
+                            proj.target = target;
+                            proj.damage = attacker.attackPower;
+                        }
                     }
-                    // Verifica se o time defensor foi completamente dizimado
+                    else // Fallback se não houver projétil
+                    {
+                        target.TakeDamage(attacker.attackPower);
+                    }
+                    // --- FIM DA LÓGICA DE PROJÉTIL ---
+
+                    yield return new WaitForSeconds(actionDelayBetweenAttacks); 
+
+                    // A verificação de morte agora acontece organicamente quando o projétil atinge o alvo
                     if (isPlayerAttacking && !AreAnyEnemiesAlive()) yield break;
                     if (!isPlayerAttacking && !AreAnyPlayerBeesAlive()) yield break;
-                }
-                else
-                {
-                     Debug.Log($"{turnPrefix} {attacker.combatantName} não encontrou alvos inimigos.");
                 }
             }
         }
@@ -359,7 +370,7 @@ public class CombatManager : MonoBehaviour
         {
             Debug.LogWarning("HealthBar Prefab ou WorldSpaceCanvasTransform não definidos no CombatManager. Barras de vida não serão criadas.");
         }
-        combatantScript.Initialize(name, maxHp, attack, isPlayer, healthBarSliderInstance, healthBarGOInstance, combatCamera);
+        combatantScript.Initialize(name, maxHp, attack, isPlayer, healthBarSliderInstance, healthBarGOInstance, combatCamera, worldSpaceCanvasTransform);
     }
 
     private void OrientTeams()
