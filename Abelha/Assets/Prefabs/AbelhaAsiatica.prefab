@@ -617,7 +617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   beeType: AsianBee
   baseIncomePerSecond: 3
-  beeVisuals: {fileID: 4535578467073156937}
+  beeVisuals: {fileID: 6733956439124191612}
   destinationOffsetRadius: 0.82
   chanceDeVisitarFlor: 0.85
   hoverNoiseSpeed: 2

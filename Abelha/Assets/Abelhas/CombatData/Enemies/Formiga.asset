@@ -17,4 +17,5 @@ MonoBehaviour:
   modelPrefab3D: {fileID: 856007863441850418, guid: 2ab6c3da3eac2b04fa2cadb66043de9e, type: 3}
   baseMaxHP: 100
   baseAttack: 25
+  impactVFXPrefab: {fileID: 3521337637261328852, guid: 8fdf22afef3c93c48993695c2611abfd, type: 3}
   attackInterval: 2

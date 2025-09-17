@@ -32,6 +32,7 @@ public class Combatant3D : MonoBehaviour
 
     private Camera _activeCombatCamera; // Câmera de combate ativa, passada pelo CombatManager
     private Transform _worldSpaceCanvas;
+    private GameObject _impactVFXPrefab;
 
     void Awake()
     {
@@ -68,7 +69,7 @@ public class Combatant3D : MonoBehaviour
     /// </summary>
     public void Initialize(string name, int calculatedMaxHP, int calculatedAttackPower, bool isPlayer,
                            Slider uiSliderInstance, GameObject uiCanvasElementInstance, Camera activeCombatCam,
-                           Transform canvasTransform)
+                           Transform canvasTransform, GameObject impactVFX)
     {
         combatantName = name;
         // Define o nome do GameObject na hierarquia para fácil identificação durante o debug
@@ -78,7 +79,8 @@ public class Combatant3D : MonoBehaviour
         attackPower = calculatedAttackPower;
         isPlayerTeam = isPlayer;
         _activeCombatCamera = activeCombatCam; // Recebe a câmera de combate ativa
-        _worldSpaceCanvas = canvasTransform; 
+        _worldSpaceCanvas = canvasTransform;
+        _impactVFXPrefab = impactVFX; 
 
         // Atribui as instâncias da UI de vida passadas pelo CombatManager
         healthBarSlider = uiSliderInstance;
@@ -115,7 +117,7 @@ public class Combatant3D : MonoBehaviour
     /// <summary>
     /// Aplica dano ao combatente.
     /// </summary>
-    public void TakeDamage(int damageAmount)
+    public void TakeDamage(int damageAmount, Transform attackerTransform)
     {
         if (!IsAlive()) return; 
 
@@ -131,7 +133,7 @@ public class Combatant3D : MonoBehaviour
         }
         // --- FIM DA ADIÇÃO ---
 
-        ShowDamageFeedback(damageAmount);
+        ShowDamageFeedback(damageAmount, attackerTransform);
 
         UpdateHealthBarVisuals();
         if (!IsAlive())
@@ -140,7 +142,7 @@ public class Combatant3D : MonoBehaviour
         }
     }
 
-    private void ShowDamageFeedback(int damage)
+    private void ShowDamageFeedback(int damage, Transform attackerTransform)
 {
     // Cria o texto de dano flutuante
         if (damageTextPrefab != null && damageTextSpawnPoint != null && _worldSpaceCanvas != null)
@@ -151,6 +153,20 @@ public class Combatant3D : MonoBehaviour
             textInstance.GetComponent<DamageText>()?.SetText(damage.ToString());
         }
 
+        if (_impactVFXPrefab != null)
+        {
+            // Ponto de impacto (pode ser o centro da abelha ou o damageTextSpawnPoint)
+            Vector3 impactPosition = damageTextSpawnPoint != null ? damageTextSpawnPoint.position : transform.position;
+            
+            // Calcula a direção DE ONDE o ataque veio
+            Vector3 directionFromAttacker = transform.position - attackerTransform.position;
+            directionFromAttacker.y = 0; // Opcional: achata a rotação no plano horizontal
+
+            // Cria o efeito com a rotação correta para "encarar" o atacante
+            Quaternion impactRotation = Quaternion.LookRotation(directionFromAttacker);
+            
+            Instantiate(_impactVFXPrefab, impactPosition, impactRotation);
+        }
         // Inicia a coroutine do "flash" de dano
         if (beeModelRenderer != null)
         {

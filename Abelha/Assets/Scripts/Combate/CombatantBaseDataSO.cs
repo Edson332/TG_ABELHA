@@ -11,5 +11,9 @@ public abstract class CombatantBaseDataSO : ScriptableObject
     [Header("Atributos de Combate Base")]
     public int baseMaxHP = 100;
     public int baseAttack = 10;
+
+    [Header("Efeitos Visuais")]
+    [Tooltip("O prefab do efeito de partícula a ser criado quando este combatente é atingido.")]
+    public GameObject impactVFXPrefab; 
     // Adicione outros stats base comuns se necessário (ex: defesa, velocidade)
 }
