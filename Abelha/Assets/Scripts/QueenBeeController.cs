@@ -4,30 +4,36 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Linq; // Para usar Except
 
+public interface IAuraAffectable
+{
+    void EnterQueenAura(float amountMultiplier, float timeMultiplier);
+    void ExitQueenAura();
+}
+
 [RequireComponent(typeof(NavMeshAgent))]
 public class QueenBeeController : MonoBehaviour
 {
     // --- Singleton Instance ---
-    public static QueenBeeController Instancia { get; private set; }
-    private List<PassiveBee> _boostedPassiveBees = new List<PassiveBee>();
+public static QueenBeeController Instancia { get; private set; }
+
     [Header("Configuração da Aura")]
-    public float auraRadius = 8f; // Raio da aura de boost
-    public LayerMask beeLayerMask; // Configurar no Inspector para a layer das abelhas Worker/Producer
-    public float checkInterval = 0.25f; // Intervalo para verificar quem está na aura (segundos)
+    public float auraRadius = 8f;
+    public LayerMask beeLayerMask;
+    public float checkInterval = 0.25f;
 
     [Header("Bônus da Aura")]
-    [Tooltip("Multiplicador na quantidade de néctar coletado (1.5 = +50%)")]
     public float nectarAmountMultiplier = 1.5f;
-    [Tooltip("Multiplicador no tempo de coleta/produção (0.8 = 20% mais rápido)")]
     public float actionTimeMultiplier = 0.8f;
 
     [Header("Visual")]
-    public GameObject auraVisualEffect; // Arraste o GameObject do efeito visual aqui
-
+    public GameObject auraVisualEffect;
+    
     private NavMeshAgent agent;
-    private Collider[] _collidersInAura = new Collider[50]; // Prealoca array para OverlapSphere
-    private HashSet<IBoostableByQueen> _beesInAura = new HashSet<IBoostableByQueen>(); // Rastreia quem está DENTRO
+    private Collider[] _collidersInAura = new Collider[150]; // Aumente se tiver muitas abelhas
+    private HashSet<GameObject> _beesInAura = new HashSet<GameObject>(); // Rastreia GameObjects
     private float _checkTimer;
+
+    private const string AURA_VFX_KEY = "AuraVFXEnabled";
 
     void Awake()
     {
@@ -47,6 +53,7 @@ public class QueenBeeController : MonoBehaviour
     {
         UpdateAuraVisualScale();
         _checkTimer = Random.Range(0, checkInterval); // Para escalonar as verificações iniciais
+        UpdateVisualsBasedOnSetting();
     }
 
     void Update()
@@ -59,15 +66,7 @@ public class QueenBeeController : MonoBehaviour
         }
     }
 
-    void OnDestroy()
-    {
-        // Garante que, se a rainha for destruída, as abelhas saibam que saíram da aura
-        NotifyBeesOfExit(_beesInAura.ToList()); // Converte para lista para iterar
-        if (Instancia == this)
-        {
-            Instancia = null;
-        }
-    }
+
 
     /// <summary>
     /// Move a Rainha para o destino especificado no NavMesh.
@@ -80,54 +79,63 @@ public class QueenBeeController : MonoBehaviour
             agent.SetDestination(destination);
         }
     }
-
+    public void UpdateVisualsBasedOnSetting()
+    {
+        if (auraVisualEffect != null)
+        {
+            // Lê a preferência do jogador. Padrão é 1 (ativo).
+            bool isEnabled = PlayerPrefs.GetInt(AURA_VFX_KEY, 1) == 1;
+            // Ativa ou desativa o objeto do efeito visual
+            auraVisualEffect.SetActive(isEnabled);
+        }
+    }
     /// <summary>
     /// Verifica quais abelhas estão dentro da aura e notifica entradas/saídas.
     /// </summary>
-    private void CheckBeesInAura()
+ private void CheckBeesInAura()
     {
-        _boostedPassiveBees.Clear();
-
         int count = Physics.OverlapSphereNonAlloc(transform.position, auraRadius, _collidersInAura, beeLayerMask);
-
-        HashSet<IBoostableByQueen> currentBeesFound = new HashSet<IBoostableByQueen>();
+        HashSet<GameObject> currentBeesFound = new HashSet<GameObject>();
 
         for (int i = 0; i < count; i++)
         {
-            Collider col = _collidersInAura[i];
-            // Tenta obter a interface IBoostableByQueen da abelha encontrada
-            IBoostableByQueen boostable = _collidersInAura[i].GetComponent<IBoostableByQueen>();
-            if (boostable != null)
-            {
-                currentBeesFound.Add(boostable);
-            }
-
-            PassiveBee passiveBee = col.GetComponent<PassiveBee>();
-            if (passiveBee != null)
-            {
-                _boostedPassiveBees.Add(passiveBee);
-            }
+            currentBeesFound.Add(_collidersInAura[i].gameObject);
         }
 
-
-        // Determina quem entrou e quem saiu desde a última checagem
-        List<IBoostableByQueen> newlyEntered = currentBeesFound.Except(_beesInAura).ToList();
-        List<IBoostableByQueen> justExited = _beesInAura.Except(currentBeesFound).ToList();
-
-        // Notifica as abelhas
-        NotifyBeesOfEntry(newlyEntered);
-        NotifyBeesOfExit(justExited);
-
-        // Atualiza o conjunto de quem está atualmente na aura
+        // Compara a lista atual com a anterior para ver quem entrou e quem saiu
+        foreach (var beeGO in currentBeesFound)
+        {
+            // Se não estava na lista antes, é uma nova entrada
+            if (!_beesInAura.Contains(beeGO))
+            {
+                NotifyBeeEntry(beeGO);
+            }
+        }
+        foreach (var beeGO in _beesInAura)
+        {
+            // Se estava na lista antiga, mas não na atual, acabou de sair
+            if (!currentBeesFound.Contains(beeGO))
+            {
+                NotifyBeeExit(beeGO);
+            }
+        }
+        
         _beesInAura = currentBeesFound;
-
-        // Limpa a parte não usada do array para evitar referências antigas (boa prática)
-        // System.Array.Clear(_collidersInAura, count, _collidersInAura.Length - count);
     }
 
-    public List<PassiveBee> GetBoostedPassiveBees()
+    private void NotifyBeeEntry(GameObject beeGO)
     {
-        return _boostedPassiveBees;
+        // Tenta notificar todos os tipos de abelhas
+        beeGO.GetComponent<IBoostableByQueen>()?.EnterQueenAura(nectarAmountMultiplier, actionTimeMultiplier);
+        beeGO.GetComponent<PassiveBee>()?.EnterQueenAura();
+    }
+
+    private void NotifyBeeExit(GameObject beeGO)
+    {
+        if (beeGO == null) return; // Abelha pode ter sido destruída
+        // Tenta notificar todos os tipos de abelhas
+        beeGO.GetComponent<IBoostableByQueen>()?.ExitQueenAura();
+        beeGO.GetComponent<PassiveBee>()?.ExitQueenAura();
     }
     private void NotifyBeesOfEntry(List<IBoostableByQueen> bees)
     {

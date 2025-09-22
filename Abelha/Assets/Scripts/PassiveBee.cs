@@ -38,6 +38,9 @@ public class PassiveBee : MonoBehaviour
     
     // Sementes aleatórias para que cada abelha se mova de forma única
     private float _perlinSeedX, _perlinSeedY, _perlinSeedZ;
+    [Header("Efeitos Visuais")]
+    [Tooltip("O GameObject do VFX da aura da rainha, que é filho desta abelha.")]
+    public GameObject auraVFX;
 
     void Start()
     {
@@ -172,6 +175,16 @@ public class PassiveBee : MonoBehaviour
         {
             _resetVisualsCoroutine = StartCoroutine(SmoothlyResetVisualsPosition());
         }
+    }
+
+    public void EnterQueenAura()
+    {
+        if (auraVFX != null) auraVFX.SetActive(true);
+    }
+
+    public void ExitQueenAura()
+    {
+        if (auraVFX != null) auraVFX.SetActive(false);
     }
 
     // Coroutine para resetar suavemente a posição do modelo visual, evitando o "teleporte"

@@ -17,40 +17,40 @@ public class PassiveIncomeManager : MonoBehaviour
         Instancia = this;
     }
 
-    void Update()
+     void Update()
     {
         if (_activePassiveBees.Count == 0) return;
 
-        float finalIncomeThisFrame = 0f;
+        float totalIncomeThisFrame = 0f;
+        float queenMultiplier = 1f; // Padrão é 1x (sem bônus)
 
-        // --- Cálculo da Renda Base ---
-        // _totalBaseIncomePerSecond já está calculado, então usamos ele.
-        float baseIncomeThisFrame = _totalBaseIncomePerSecond * Time.deltaTime;
-
-        // --- Cálculo do Bônus da Rainha ---
-        float queenBonusThisFrame = 0f;
+        // Pega o multiplicador da rainha, se ela existir
         if (QueenBeeController.Instancia != null)
         {
-            List<PassiveBee> boostedBees = QueenBeeController.Instancia.GetBoostedPassiveBees();
-            float queenMultiplier = QueenBeeController.Instancia.nectarAmountMultiplier; // Usando o multiplicador de néctar
-
-            if (boostedBees != null && boostedBees.Count > 0)
-            {
-                foreach (var bee in boostedBees)
-                {
-                    // O bônus é a renda extra (acima do normal)
-                    float bonusAmount = bee.baseIncomePerSecond * (queenMultiplier - 1);
-                    queenBonusThisFrame += bonusAmount * Time.deltaTime;
-                }
-            }
+            queenMultiplier = QueenBeeController.Instancia.nectarAmountMultiplier;
         }
 
-        finalIncomeThisFrame = baseIncomeThisFrame + queenBonusThisFrame;
-
-        // Adiciona a renda final ao total
-        if (finalIncomeThisFrame > 0)
+        // Itera por todas as abelhas passivas ativas
+        foreach (var bee in _activePassiveBees)
         {
-            GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, finalIncomeThisFrame);
+            float currentBeeIncome = bee.baseIncomePerSecond;
+
+            // Verifica se a abelha está perto da rainha para aplicar o bônus
+            if (QueenBeeController.Instancia != null)
+            {
+                float distanceToQueen = Vector3.Distance(bee.transform.position, QueenBeeController.Instancia.transform.position);
+                if (distanceToQueen <= QueenBeeController.Instancia.auraRadius)
+                {
+                    // Está dentro da aura, aplica o multiplicador
+                    currentBeeIncome *= queenMultiplier;
+                }
+            }
+            totalIncomeThisFrame += currentBeeIncome * Time.deltaTime;
+        }
+        
+        if (totalIncomeThisFrame > 0)
+        {
+            GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, totalIncomeThisFrame);
         }
     }
 

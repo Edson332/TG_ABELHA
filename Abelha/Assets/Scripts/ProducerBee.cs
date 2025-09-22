@@ -2,12 +2,18 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
+// --- MUDANÇA 1: Implementar a interface IBoostableByQueen ---
 [RequireComponent(typeof(NavMeshAgent))]
-public class ProducerBee : MonoBehaviour, BeeStatsUpdater
+public class ProducerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
 {
     [Header("Identificação")]
     [Tooltip("ID interno do tipo. DEVE CORRESPONDER ao usado nos ScriptableObjects de Upgrade e no BeeManager.")]
     public string beeTypeName = "ProducerBee";
+
+    // --- MUDANÇA 2: Adicionar campo para o VFX da Aura ---
+    [Header("Efeitos Visuais")]
+    [Tooltip("O GameObject do VFX da aura da rainha, que é filho desta abelha.")]
+    public GameObject auraVFX;
 
     [Header("Parâmetros Base (Antes dos Upgrades)")]
     public float baseProductionTime = 2f;
@@ -20,12 +26,17 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater
     public float initialDelay = 0f;
     public float destinationOffsetRadius = 1f;
 
-    // Referências de destino agora são privadas
+    // Referências de destino privadas
     private Transform _honeycombTarget;
     private Transform _hiveTarget;
 
     private NavMeshAgent agent;
     private float _effectiveProductionAmount;
+
+    // --- MUDANÇA 3: Adicionar campos para controlar o estado da Aura ---
+    private bool _isInQueenAura = false;
+    private float _queenAmountMultiplier = 1f;
+    private float _queenTimeMultiplier = 1f;
 
     private void Awake()
     {
@@ -41,7 +52,6 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater
             return;
         }
 
-        // Pega as referências dos destinos do LocationsManager
         if (LocationsManager.Instancia != null)
         {
             _honeycombTarget = LocationsManager.Instancia.honeycombTarget;
@@ -72,7 +82,27 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater
         {
             GerenciadorUpgrades.Instancia.DesregistrarAbelha(this, beeTypeName);
         }
+        // Garante que o estado da aura seja resetado se a abelha for desativada
+        ExitQueenAura();
     }
+
+    // --- MUDANÇA 4: Implementar os métodos da interface da Aura ---
+    public void EnterQueenAura(float amountMultiplier, float timeMultiplier)
+    {
+        _isInQueenAura = true;
+        _queenAmountMultiplier = amountMultiplier;
+        _queenTimeMultiplier = timeMultiplier;
+        if (auraVFX != null) auraVFX.SetActive(true);
+    }
+
+    public void ExitQueenAura()
+    {
+        _isInQueenAura = false;
+        _queenAmountMultiplier = 1f;
+        _queenTimeMultiplier = 1f;
+        if (auraVFX != null) auraVFX.SetActive(false);
+    }
+    // --- FIM DA MUDANÇA 4 ---
 
     public void AtualizarVelocidade(float multiplicador)
     {
@@ -94,22 +124,29 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater
     {
         while (true)
         {
-            _effectiveProductionAmount = baseProductionAmount;
-            float productionMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.MelProduzido);
-            float nectarMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.NectarColetado);
+            // --- MUDANÇA 5: Aplicar os bônus da aura nos cálculos ---
+            _effectiveProductionAmount = baseProductionAmount; // A quantidade base que ela tenta processar
+            
+            // Multiplicadores dos upgrades
+            float productionUpgradeMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.MelProduzido);
+            float nectarUpgradeMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.NectarColetado);
+
+            // Multiplicadores FINAIS, combinando upgrades e bônus da rainha
+            float finalProductionMultiplier = productionUpgradeMultiplier * (_isInQueenAura ? _queenAmountMultiplier : 1f);
+            float finalNectarMultiplier = nectarUpgradeMultiplier * (_isInQueenAura ? _queenAmountMultiplier : 1f);
+            float finalTimeMultiplier = _isInQueenAura ? _queenTimeMultiplier : 1f;
 
             // 1. Tenta pegar Néctar do estoque global
             if (GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.Nectar, _effectiveProductionAmount))
             {
-                // Conseguiu, agora vai processar e depositar
                 // Processar
                 yield return StartCoroutine(MoveToTarget(GetRandomDestination(_honeycombTarget.position)));
-                yield return new WaitForSeconds(baseProductionTime);
+                yield return new WaitForSeconds(baseProductionTime * finalTimeMultiplier); // Tempo reduzido pela aura
                 
                 // Depositar
                 yield return StartCoroutine(MoveToTarget(GetRandomDestination(_hiveTarget.position)));
-                yield return new WaitForSeconds(baseDepositTime);
-                float melFinalAmount = _effectiveProductionAmount * productionMultiplier;
+                yield return new WaitForSeconds(baseDepositTime * finalTimeMultiplier); // Tempo reduzido pela aura
+                float melFinalAmount = _effectiveProductionAmount * finalProductionMultiplier; // Produção aumentada por upgrades e aura
                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
             }
             else
@@ -118,16 +155,15 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater
                 Transform targetFlower = LocationsManager.Instancia.GetRandomFlowerTarget();
                 if (targetFlower == null)
                 {
-                    Debug.LogWarning("Nenhuma flor encontrada, esperando...", this);
                     yield return new WaitForSeconds(5f);
                     continue;
                 }
 
                 yield return StartCoroutine(MoveToTarget(GetRandomDestination(targetFlower.position)));
-                yield return new WaitForSeconds(baseCollectionTime);
-                float nectarColetado = baseProductionAmount * nectarMultiplier;
+                yield return new WaitForSeconds(baseCollectionTime * finalTimeMultiplier); // Tempo reduzido pela aura
+                float nectarColetado = _effectiveProductionAmount * finalNectarMultiplier; // Coleta aumentada por upgrades e aura
                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, nectarColetado);
-                yield return new WaitForSeconds(0.5f); // Pequena pausa antes de tentar pegar de novo
+                yield return new WaitForSeconds(0.5f);
             }
 
             yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));

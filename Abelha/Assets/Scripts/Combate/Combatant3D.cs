@@ -22,7 +22,7 @@ public class Combatant3D : MonoBehaviour
 
     [Header("Configurações de Morte")]
     [Tooltip("Tempo para o objeto ser desativado/destruído após a 'morte'.")]
-    public float deathEffectDelay = 1.5f;
+    public float deathEffectDelay = 0.1f;
 
     [Header("Visual Feedback")]
     public GameObject damageTextPrefab; // Arraste o DamageText_Prefab aqui
@@ -33,6 +33,8 @@ public class Combatant3D : MonoBehaviour
     private Camera _activeCombatCamera; // Câmera de combate ativa, passada pelo CombatManager
     private Transform _worldSpaceCanvas;
     private GameObject _impactVFXPrefab;
+
+    private GameObject _deathVFXPrefab;
 
     void Awake()
     {
@@ -69,7 +71,7 @@ public class Combatant3D : MonoBehaviour
     /// </summary>
     public void Initialize(string name, int calculatedMaxHP, int calculatedAttackPower, bool isPlayer,
                            Slider uiSliderInstance, GameObject uiCanvasElementInstance, Camera activeCombatCam,
-                           Transform canvasTransform, GameObject impactVFX)
+                           Transform canvasTransform, GameObject impactVFX,GameObject deathVFX)
     {
         combatantName = name;
         // Define o nome do GameObject na hierarquia para fácil identificação durante o debug
@@ -81,6 +83,7 @@ public class Combatant3D : MonoBehaviour
         _activeCombatCamera = activeCombatCam; // Recebe a câmera de combate ativa
         _worldSpaceCanvas = canvasTransform;
         _impactVFXPrefab = impactVFX; 
+        _deathVFXPrefab = deathVFX;
 
         // Atribui as instâncias da UI de vida passadas pelo CombatManager
         healthBarSlider = uiSliderInstance;
@@ -228,7 +231,12 @@ public class Combatant3D : MonoBehaviour
     private void Die()
     {
         Debug.Log($"{combatantName} foi derrotado!");
-        // _animator?.SetTrigger("Death"); // Descomente quando tiver animação de morte
+        if (_deathVFXPrefab != null)
+        {
+            // Cria o efeito de morte na posição do combatente e sem rotação específica
+            // Ele será destruído por AutoDestroyVFX
+            Instantiate(_deathVFXPrefab, transform.position, Quaternion.identity); 
+        }
 
         if (healthBarCanvasElement != null)
         {

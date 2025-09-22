@@ -48,6 +48,16 @@ public class CombatManager : MonoBehaviour
     public CombatState currentCombatState { get; private set; } = CombatState.NotActive;
     public bool isCombatActive { get; private set; } = false;
 
+    [Header("Efeitos Visuais de Fim de Combate")]
+    [Tooltip("VFX a ser criado quando o jogador vence.")]
+    public GameObject victoryVFXPrefab;
+    [Tooltip("VFX a ser criado quando o jogador perde.")]
+    public GameObject defeatVFXPrefab;
+    [Tooltip("Ponto na arena onde o VFX de resultado irá aparecer.")]
+    public Transform resultVFXSpawnPoint; // Opcional, pode ser o centro da arena
+
+    private GameObject _currentResultVFXInstance;
+
     void Awake()
     {
         if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
@@ -163,6 +173,22 @@ public class CombatManager : MonoBehaviour
         isCombatActive = false;
 
         Debug.Log(playerWon ? "Jogador VENCEU o combate!" : "Jogador foi DERROTADO.");
+
+        if (_currentResultVFXInstance != null)
+        {
+            Destroy(_currentResultVFXInstance);
+        }
+
+        Vector3 spawnPos = resultVFXSpawnPoint != null ? resultVFXSpawnPoint.position : Vector3.zero;
+
+        if (playerWon && victoryVFXPrefab != null)
+        {
+            _currentResultVFXInstance = Instantiate(victoryVFXPrefab, spawnPos, Quaternion.identity);
+        }
+        else if (!playerWon && defeatVFXPrefab != null)
+        {
+            _currentResultVFXInstance = Instantiate(defeatVFXPrefab, spawnPos, Quaternion.identity);
+        }
         
         if (playerWon)
         {
@@ -190,6 +216,12 @@ public class CombatManager : MonoBehaviour
 
     private IEnumerator CleanupCombatSequence()
     {
+
+        if (_currentResultVFXInstance != null)
+        {
+            Destroy(_currentResultVFXInstance);
+            _currentResultVFXInstance = null; // Limpa a referência
+        }
         yield return new WaitForSeconds(postCombatUIDelay);
 
         ClearPreviousCombatants(); 
@@ -270,7 +302,7 @@ public class CombatManager : MonoBehaviour
             healthBarGO = Instantiate(healthBarPrefab, worldSpaceCanvasTransform);
             slider = healthBarGO.GetComponent<Slider>();
         }
-        script.Initialize(data.combatantName, maxHp, attack, isPlayer, slider, healthBarGO, combatCamera, worldSpaceCanvasTransform, data.impactVFXPrefab);
+        script.Initialize(data.combatantName, maxHp, attack, isPlayer, slider, healthBarGO, combatCamera, worldSpaceCanvasTransform, data.impactVFXPrefab, data.deathVFXPrefab);
     }
 
     private void OrientTeams()

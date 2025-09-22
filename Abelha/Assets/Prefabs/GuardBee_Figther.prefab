@@ -697,7 +697,7 @@ MonoBehaviour:
   healthBarSlider: {fileID: 0}
   healthBarCanvasElement: {fileID: 0}
   healthBarAnchor: {fileID: 2071382675376929043}
-  deathEffectDelay: 1.5
+  deathEffectDelay: 0.3
   damageTextPrefab: {fileID: 9095407821250932517, guid: 8004cccc017c04c44b69a278a12251cd, type: 3}
   damageTextSpawnPoint: {fileID: 729103489026029075}
   beeModelRenderer: {fileID: 3347873839130402743}

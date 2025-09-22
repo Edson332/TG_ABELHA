@@ -18,4 +18,5 @@ MonoBehaviour:
   baseMaxHP: 100
   baseAttack: 25
   impactVFXPrefab: {fileID: 3521337637261328852, guid: 8fdf22afef3c93c48993695c2611abfd, type: 3}
+  deathVFXPrefab: {fileID: 8229161652594700796, guid: 9366e771eddba344a82a4e861de79f33, type: 3}
   attackInterval: 2

@@ -15,5 +15,8 @@ public abstract class CombatantBaseDataSO : ScriptableObject
     [Header("Efeitos Visuais")]
     [Tooltip("O prefab do efeito de partícula a ser criado quando este combatente é atingido.")]
     public GameObject impactVFXPrefab; 
+
+    [Tooltip("O prefab do efeito de partícula a ser criado quando este combatente morre.")]
+    public GameObject deathVFXPrefab;
     // Adicione outros stats base comuns se necessário (ex: defesa, velocidade)
 }

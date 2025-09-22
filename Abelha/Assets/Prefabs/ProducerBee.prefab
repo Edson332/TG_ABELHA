@@ -533,6 +533,8 @@ GameObject:
   - component: {fileID: 8017632535459937838}
   - component: {fileID: 8171911553315313935}
   - component: {fileID: 1918172298745327545}
+  - component: {fileID: 8621832648794531687}
+  - component: {fileID: 7944867689282453451}
   m_Layer: 0
   m_Name: ProducerBee
   m_TagString: Bee
@@ -614,6 +616,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beeTypeName: ProducerBee
+  auraVFX: {fileID: 8659880313410153888}
   baseProductionTime: 2
   baseDepositTime: 2
   baseCollectionTime: 2
@@ -621,6 +624,54 @@ MonoBehaviour:
   baseSpeed: 3
   initialDelay: 0.5
   destinationOffsetRadius: 1
+--- !u!54 &8621832648794531687
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9032522414716387351}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
+--- !u!135 &7944867689282453451
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9032522414716387351}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 1
+  m_Center: {x: 0.6, y: 4, z: 0.3}
 --- !u!1 &9121501698513786497
 GameObject:
   m_ObjectHideFlags: 0
@@ -658,6 +709,85 @@ Transform:
   - {fileID: 3888763983499188594}
   m_Father: {fileID: 8507906537272695469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &4438697004335170541
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7977270291492222517}
+    m_Modifications:
+    - target: {fileID: 644063924607566490, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -10.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.44
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.73
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023616039037496909, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_Name
+      value: AuraBoost_VFX_Prefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023616039037496909, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5023616039037496909, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+      propertyPath: m_TagString
+      value: Bee
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+--- !u!4 &1708130006652203381 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3039107693417443992, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+  m_PrefabInstance: {fileID: 4438697004335170541}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8659880313410153888 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5023616039037496909, guid: 4ad5ef97f4f922642adb31102699f449, type: 3}
+  m_PrefabInstance: {fileID: 4438697004335170541}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6507576686594167558
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -728,7 +858,10 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: b29e993469a118c46bbf46110f47dcaa, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 3817780984722793779, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1708130006652203381}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bebad74ddbd95e54bbeb6cb02f461acd, type: 3}
 --- !u!4 &7977270291492222517 stripped

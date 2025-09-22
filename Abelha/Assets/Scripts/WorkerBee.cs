@@ -34,6 +34,10 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
     private float _queenAmountMultiplier = 1f;
     private float _queenTimeMultiplier = 1f;
 
+    [Header("Efeitos Visuais")]
+    [Tooltip("O GameObject do VFX da aura da rainha, que é filho desta abelha.")]
+    public GameObject auraVFX;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -89,6 +93,7 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
         _isInQueenAura = true;
         _queenAmountMultiplier = amountMultiplier;
         _queenTimeMultiplier = timeMultiplier;
+        if (auraVFX != null) auraVFX.SetActive(true);
     }
 
     public void ExitQueenAura()
@@ -96,6 +101,7 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
         _isInQueenAura = false;
         _queenAmountMultiplier = 1f;
         _queenTimeMultiplier = 1f;
+        if (auraVFX != null) auraVFX.SetActive(false);
     }
 
     public void AtualizarVelocidade(float multiplicador)
