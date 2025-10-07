@@ -48,6 +48,12 @@ public class PassiveIncomeManager : MonoBehaviour
             totalIncomeThisFrame += currentBeeIncome * Time.deltaTime;
         }
         
+        if (RoyalJellyShopManager.Instancia != null)
+        {
+            float globalBonus = RoyalJellyShopManager.Instancia.GetGlobalProductionBonus();
+            totalIncomeThisFrame *= (1f + globalBonus); // Ex: 1 + 0.10 = 1.10 (bônus de 10%)
+        }
+
         if (totalIncomeThisFrame > 0)
         {
             GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, totalIncomeThisFrame);

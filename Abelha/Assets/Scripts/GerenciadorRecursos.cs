@@ -6,7 +6,8 @@ public enum TipoRecurso
 {
     Nectar,
     MelProcessado,
-    Mel
+    Mel,
+    GeleiaReal
 }
 
 public class GerenciadorRecursos : MonoBehaviour
@@ -38,6 +39,7 @@ public class GerenciadorRecursos : MonoBehaviour
         InicializarRecurso(TipoRecurso.Nectar, 0);
         InicializarRecurso(TipoRecurso.MelProcessado, 0);
         InicializarRecurso(TipoRecurso.Mel, 0);
+        InicializarRecurso(TipoRecurso.GeleiaReal, 0);
     }
 
     /// <summary>
@@ -78,15 +80,17 @@ public class GerenciadorRecursos : MonoBehaviour
     }
     }
 
-public void ResetRecursos()
+    public void ResetRecursos()
     {
         // Cria uma lista de chaves para evitar modificar o dicionário enquanto itera
         List<TipoRecurso> keys = new List<TipoRecurso>(recursos.Keys);
         foreach (var key in keys)
         {
             recursos[key] = 0;
+            recursos[TipoRecurso.GeleiaReal] = 0;
         }
         Debug.Log("Todos os recursos foram resetados para 0.");
+        
     }
 
     public bool RemoverRecurso(TipoRecurso tipo, float valor)

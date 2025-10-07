@@ -8,6 +8,7 @@ public class RecursosUI : MonoBehaviour
     public TextMeshProUGUI nectarText; // Ou TextMeshProUGUI
     public TextMeshProUGUI melProcessadoText; // Ou TextMeshProUGUI
     public TextMeshProUGUI melText; // Ou TextMeshProUGUI
+    public TextMeshProUGUI geleiaRealText;
 
     // Cache para evitar chamar GetComponent todo frame (opcional mas bom)
     private GerenciadorRecursos _gerenciadorRecursos;
@@ -53,8 +54,14 @@ public class RecursosUI : MonoBehaviour
         if (melProcessadoText != null) {
             melProcessadoText.text = $"Processando: {melProcessadoValor.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}";
         }
+        if (geleiaRealText != null)
+        {
+            float geleiaRealValor = _gerenciadorRecursos.ObterRecurso(TipoRecurso.GeleiaReal);
+            geleiaRealText.text = $"Geleia Real: {geleiaRealValor.ToString("F1")}";
+        }
 
-         if (melText != null) {
+         if (melText != null)
+        {
             melText.text = $"Mel: {melValor.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}";
         }
     }

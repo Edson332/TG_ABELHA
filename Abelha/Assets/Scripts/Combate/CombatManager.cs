@@ -196,6 +196,7 @@ public class CombatManager : MonoBehaviour
             if (currentOperatingWave != null && GerenciadorRecursos.Instancia != null)
             {
                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, currentOperatingWave.honeyReward);
+                GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.GeleiaReal, currentOperatingWave.royalJellyReward);
             }
         }
         
@@ -263,7 +264,14 @@ public class CombatManager : MonoBehaviour
                 finalMaxHP = Mathf.RoundToInt(dataSO.baseMaxHP * hpMultiplier);
                 finalAttack = Mathf.RoundToInt(dataSO.baseAttack * attackMultiplier);
             }
-            
+            if (RoyalJellyShopManager.Instancia != null)
+            {
+                float globalHPBonus = RoyalJellyShopManager.Instancia.GetGlobalCombatHPBonus();
+                float globalAttackBonus = RoyalJellyShopManager.Instancia.GetGlobalCombatAttackBonus();
+
+                finalMaxHP = Mathf.RoundToInt(finalMaxHP * (1f + globalHPBonus));
+                finalAttack = Mathf.RoundToInt(finalAttack * (1f + globalAttackBonus));
+            }
             InitializeCombatant(combatantScript, dataSO, finalMaxHP, finalAttack, true);
             _playerCombatants.Add(combatantScript);
             spawnIndex++;

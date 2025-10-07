@@ -18,5 +18,6 @@ public class EnemyWaveSO : ScriptableObject
 
     [Header("Recompensas da Onda")]
     public int honeyReward = 50;
+    public int royalJellyReward = 5;
     // Adicione outras recompensas (pólen, itens especiais, etc.)
 }

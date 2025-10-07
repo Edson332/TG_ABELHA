@@ -41,6 +41,7 @@ public class CombatAlertUI : MonoBehaviour
 
     public void OnDefendButtonPressed()
     {
+        if (UIManager.Instancia != null) UIManager.Instancia.HideAllManagedPanels();
         alertPanel.SetActive(false);
         // Time.timeScale = 1f; // Opcional: despausar o jogo
 

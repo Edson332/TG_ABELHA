@@ -6,12 +6,13 @@ using TMPro;
 
 public class MenuManager : MonoBehaviour
 {
+    public static MenuManager Instancia { get; private set; } 
     [Header("Panels")]
     public GameObject mainMenuPanel;
     public GameObject upgradeMenuPanel;
     public GameObject upgradeTAB;
     public GameObject buyTAB;
-
+    public GameObject structureTAB;
     [Header("Dependencies")]
     public AchievementManager achievementManager; // Must be assigned in Inspector
     
@@ -23,6 +24,11 @@ public class MenuManager : MonoBehaviour
     [Header("Notifications")]
     public GameObject achievementNotificationSymbol;
 
+    private void Awake()
+    {
+        if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
+        Instancia = this;
+    }
     void Start()
     {
         // Garante que o achievementManager foi atribuído
@@ -49,6 +55,9 @@ public class MenuManager : MonoBehaviour
             }
         }
 
+        if (achievementManager == null) { Debug.LogError("AchievementManager não foi atribuído no Inspector do MenuManager!", this); return; }
+        foreach (GameObject panel in achievementPanels) { if(panel != null) panel.SetActive(false); }
+        for (int i = 0; i < menuButtons.Count; i++) { int index = i; if(menuButtons[i] != null) { menuButtons[i].onClick.RemoveAllListeners(); menuButtons[i].onClick.AddListener(() => ShowAchievementPanel(index)); } }
         UpdateMenuButtons();
     }
 
@@ -176,19 +185,58 @@ public class MenuManager : MonoBehaviour
         return null;
     }
 
-    // --- Seus outros métodos de UI (sem alterações) ---
+    
     public void ShowMainMenu()
     {
-        mainMenuPanel.SetActive(true);
-        foreach (GameObject panel in achievementPanels)
+        CloseUpgradePanels();
+        if (AchievementMenu.Instancia != null)
         {
-            if(panel != null) panel.SetActive(false);
+            AchievementMenu.Instancia.ClosePanel();
+        }
+
+        // Ativa o HUD principal do jogo se ele estiver desativado
+        if (mainMenuPanel != null && !mainMenuPanel.activeSelf)
+        {
+            AchievementMenu.Instancia.TogglePanel();
+            mainMenuPanel.SetActive(true);
         }
     }
-    public void ShowUpgradeMenu()
+
+    public void ShowStructureTAB()
+    {
+        if (structureTAB != null)
+        {
+            structureTAB.SetActive(true);
+            // Garante que as outras abas estejam fechadas
+            if (upgradeTAB != null) upgradeTAB.SetActive(false);
+            if (buyTAB != null) buyTAB.SetActive(false);
+        }
+    }
+    public void ToggleUpgradeMenu()
+    {
+        // 1. Verifica qual deve ser o próximo estado do painel de upgrades
+        bool shouldBeActive = !upgradeMenuPanel.activeSelf;
+
+        // 2. Fecha todos os outros painéis principais primeiro
+        if (AchievementMenu.Instancia != null)
+        {
+            AchievementMenu.Instancia.ClosePanel();
+        }
+        // Adicione aqui outros painéis principais para fechar se houver no futuro
+
+        // 3. Define o estado final do painel de upgrades
+        if (upgradeMenuPanel != null)
+        {
+            upgradeMenuPanel.SetActive(shouldBeActive);
+        }
+    }
+    
+    public void CloseUpgradePanels()
     {
         if (upgradeMenuPanel != null)
-            upgradeMenuPanel.SetActive(!upgradeMenuPanel.activeSelf);
+        {
+            upgradeMenuPanel.SetActive(false);
+        }
     }
     public void ShowUpgradeTAB()
     {
@@ -196,6 +244,7 @@ public class MenuManager : MonoBehaviour
         {
             upgradeTAB.SetActive(true);
             if (buyTAB != null) buyTAB.SetActive(false);
+            if (structureTAB != null) structureTAB.SetActive(false);
         }
     }
     public void ShowBuyTAB()
@@ -204,10 +253,12 @@ public class MenuManager : MonoBehaviour
         {
             buyTAB.SetActive(true);
             if (upgradeTAB != null) upgradeTAB.SetActive(false);
+            if (structureTAB != null) structureTAB.SetActive(false);
         }
     }
     public void BackToMainMenu()
     {
-        ShowMainMenu();
+        mainMenuPanel.SetActive(false);
+        
     }
 }

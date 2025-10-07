@@ -17,3 +17,4 @@ MonoBehaviour:
   - enemyData: {fileID: 11400000, guid: d6fac5f30e2af33448c15384253340e2, type: 2}
     quantity: 2
   honeyReward: 150
+  royalJellyReward: 20

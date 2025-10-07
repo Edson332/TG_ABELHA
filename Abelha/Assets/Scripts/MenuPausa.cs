@@ -28,6 +28,7 @@ public class MenuPausa : MonoBehaviour
         painelMenuPausa.SetActive(true);
         Time.timeScale = 0f;
         jogoPausado = true;
+        if (UIManager.Instancia != null) UIManager.Instancia.SetGamePaused(true);
     }
 
     public void VoltarAoJogo()
@@ -35,6 +36,7 @@ public class MenuPausa : MonoBehaviour
         painelMenuPausa.SetActive(false);
         Time.timeScale = 1f; // Volta o tempo ao normal
         jogoPausado = false;
+        if (UIManager.Instancia != null) UIManager.Instancia.SetGamePaused(false);
     }
 
     // --- MÉTODO MODIFICADO ---

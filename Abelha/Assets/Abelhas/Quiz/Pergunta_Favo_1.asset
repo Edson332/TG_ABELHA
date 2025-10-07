@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a5b492b788e293428c2f628dcc8a3be, type: 3}
-  m_Name: Second
+  m_Script: {fileID: 11500000, guid: 4455832e86d6e734790b38b9b40bfe16, type: 3}
+  m_Name: Pergunta_Favo_1
   m_EditorClassIdentifier: 
-  waveName: Second
-  enemyGroups:
-  - enemyData: {fileID: 11400000, guid: 062878af3250ff941b2e16e77bea422f, type: 2}
-    quantity: 2
-  honeyReward: 100
-  royalJellyReward: 20
+  questionText: Pergunta teste
+  answers:
+  - Nao
+  - Sim
+  - Nao
+  correctAnswerIndex: 1
