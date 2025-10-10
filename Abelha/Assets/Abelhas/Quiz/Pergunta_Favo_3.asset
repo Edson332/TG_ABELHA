@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4455832e86d6e734790b38b9b40bfe16, type: 3}
-  m_Name: Pergunta_Favo_1
+  m_Name: Pergunta_Favo_3
   m_EditorClassIdentifier: 
-  questionText: "Qual \xE9 o nome do processo de transfer\xEAncia de p\xF3len de
-    uma flor para outra?"
+  questionText: "Qual \xE9 o nome da subst\xE2ncia que as abelhas produzem para construir
+    seus favos?"
   answers:
-  - " Fecunda\xE7\xE3o"
-  - "Poliniza\xE7\xE3o"
-  - "Germina\xE7\xE3o"
-  correctAnswerIndex: 1
+  - Cera
+  - "Pr\xF3polis"
+  - Geleia real
+  correctAnswerIndex: 0

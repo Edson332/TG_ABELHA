@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4455832e86d6e734790b38b9b40bfe16, type: 3}
   m_Name: Pergunta_Favo_2
   m_EditorClassIdentifier: 
-  questionText: Pergunta teste
+  questionText: "Como as abelhas se comunicam para indicar a localiza\xE7\xE3o de
+    flores?"
   answers:
-  - Nao
-  - Sim
-  - Nao
-  correctAnswerIndex: 1
+  - "Dan\xE7a"
+  - Zumbido
+  - "Ferom\xF4nios"
+  correctAnswerIndex: 0
