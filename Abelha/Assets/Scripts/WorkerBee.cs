@@ -150,6 +150,8 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
 
             yield return new WaitForSeconds(finalCollectionTime);
             GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, finalCollectionAmount);
+            GameEvents.ReportResourceCollected(transform, finalCollectionAmount, TipoRecurso.Nectar);
+
 
             // --- 2. Processamento ---
             yield return StartCoroutine(MoveToTarget(GetRandomDestination(_honeycombTarget.position)));
@@ -178,6 +180,7 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
             yield return new WaitForSeconds(finalDepositTime);
             // Adiciona o mel final diretamente. Não interagimos com o recurso MelProcessado.
             GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
+            GameEvents.ReportResourceCollected(transform, melFinalAmount, TipoRecurso.Mel);
             
             yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
         }

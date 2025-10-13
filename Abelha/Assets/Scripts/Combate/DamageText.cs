@@ -2,7 +2,7 @@
 using UnityEngine;
 using TMPro;
 
-public class DamageText : MonoBehaviour
+public class FloatingText : MonoBehaviour
 {
     public float moveSpeed = 1f;
     public float fadeTime = 1f;

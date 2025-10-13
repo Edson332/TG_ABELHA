@@ -148,6 +148,7 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
                 yield return new WaitForSeconds(baseDepositTime * finalTimeMultiplier); // Tempo reduzido pela aura
                 float melFinalAmount = _effectiveProductionAmount * finalProductionMultiplier; // Produção aumentada por upgrades e aura
                 GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, melFinalAmount);
+                GameEvents.ReportResourceCollected(transform, melFinalAmount, TipoRecurso.Mel);
             }
             else
             {

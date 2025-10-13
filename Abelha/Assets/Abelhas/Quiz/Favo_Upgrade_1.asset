@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeID: GLOBAL_PRODUCTION_BONUS
   displayName: Mais Favos
-  description: 'Aumenta a quantidade de favos de mel '
+  description: "Aumenta a quantidade de favos de mel e o bonus de produ\xE7\xE3o
+    de todas as abelhas que n\xE3o sejam primarias em 5%"
   icon: {fileID: 21300000, guid: 17ce495f54f89124da781c73dbd1ed24, type: 3}
   visualEffect: 1
   costPerLevel: 050000000500000064000000

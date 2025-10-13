@@ -9,6 +9,7 @@ public class FlowerClick : MonoBehaviour
         if (GerenciadorRecursos.Instancia != null)
         {
             GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Nectar, nectarPerClick);
+            GameEvents.ReportResourceCollected(transform, nectarPerClick, TipoRecurso.Nectar);
             Debug.Log("Néctar coletado!");
             // Aqui você pode adicionar efeitos visuais ou sonoros
         }

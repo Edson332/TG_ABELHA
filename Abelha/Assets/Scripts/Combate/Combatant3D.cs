@@ -153,7 +153,7 @@ public class Combatant3D : MonoBehaviour
             // --- CORREÇÃO AQUI ---
             // Usa a variável _worldSpaceCanvas que guardamos
             GameObject textInstance = Instantiate(damageTextPrefab, damageTextSpawnPoint.position, Quaternion.identity, _worldSpaceCanvas);
-            textInstance.GetComponent<DamageText>()?.SetText(damage.ToString());
+            textInstance.GetComponent<FloatingText>()?.SetText(damage.ToString());
         }
 
         if (_impactVFXPrefab != null)

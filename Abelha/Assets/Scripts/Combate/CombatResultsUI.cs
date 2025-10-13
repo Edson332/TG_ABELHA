@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Text;
 
 public class CombatResultsUI : MonoBehaviour
 {
@@ -18,7 +19,7 @@ public class CombatResultsUI : MonoBehaviour
     [Header("Cores para Feedback")]
     public Color victoryColor = Color.yellow;
     public Color defeatColor = Color.gray;
-
+    private StringBuilder _rewardsStringBuilder = new StringBuilder();
     void Start()
     {
         // Garante que o painel comece desativado
@@ -42,18 +43,33 @@ public class CombatResultsUI : MonoBehaviour
             titleText.text = "VITÓRIA!";
             titleText.color = victoryColor;
             messageText.text = "Você defendeu a colmeia com sucesso!";
-            
+
             // Mostra e preenche a seção de recompensas
             rewardsSection.SetActive(true);
+            _rewardsStringBuilder.Clear(); // Limpa o texto anterior
+
             if (completedWave != null)
             {
-                rewardsText.text = $"- {completedWave.honeyReward} Mel";
-                // Adicione outras recompensas aqui se houver
+                // Adiciona a recompensa de Mel, se houver
+                if (completedWave.honeyReward > 0)
+                {
+                    _rewardsStringBuilder.AppendLine($"- {completedWave.honeyReward} Mel");
+                }
+
+                // Adiciona a recompensa de Geleia Real, se houver
+                if (completedWave.royalJellyReward > 0)
+                {
+                    _rewardsStringBuilder.AppendLine($"- {completedWave.royalJellyReward} Geleia Real");
+                }
             }
-            else
+
+            // Se nenhuma recompensa foi adicionada, mostra uma mensagem padrão
+            if (_rewardsStringBuilder.Length == 0)
             {
-                rewardsText.text = "Nenhuma recompensa especificada.";
+                _rewardsStringBuilder.AppendLine("Nenhuma recompensa nesta batalha.");
             }
+
+            rewardsText.text = _rewardsStringBuilder.ToString();
         }
         else
         {
@@ -61,7 +77,7 @@ public class CombatResultsUI : MonoBehaviour
             titleText.text = "DERROTA...";
             titleText.color = defeatColor;
             messageText.text = "Os invasores foram fortes demais desta vez. Prepare-se melhor para a próxima!";
-            
+
             // Esconde a seção de recompensas
             rewardsSection.SetActive(false);
         }
@@ -73,7 +89,7 @@ public class CombatResultsUI : MonoBehaviour
     private void OnContinueButtonPressed()
     {
         resultsPanel.SetActive(false);
-        
+
         // Notifica o CombatManager para finalizar a sequência de combate (limpar a cena, trocar câmera, etc.)
         if (CombatManager.Instancia != null)
         {
@@ -81,3 +97,4 @@ public class CombatResultsUI : MonoBehaviour
         }
     }
 }
+

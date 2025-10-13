@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Flores_Upgrade_1
   m_EditorClassIdentifier: 
   upgradeID: GLOBAL_COMBAT_ATTACK_BONUS
-  displayName: Mais Favos
-  description: 'Aumenta a quantidade de flores '
+  displayName: Mais Flores
+  description: "Aumenta a quantidade de flores e a for\xE7a das abelhas em combate"
   icon: {fileID: 21300000, guid: 17ce495f54f89124da781c73dbd1ed24, type: 3}
   visualEffect: 2
   costPerLevel: 0500000005000000
