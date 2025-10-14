@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class BeeUpgradeButton : MonoBehaviour
 {
+    public TutorialStepSO queenBeeTutorial;
     // ===================================================================
     // SEÇÃO PARA COMPRAR NOVAS ABELHAS (SEU CÓDIGO ATUAL - ESTÁ PERFEITO)
     // ===================================================================
@@ -49,6 +50,37 @@ public class BeeUpgradeButton : MonoBehaviour
         }
     }
 
+    public void OnBuyNordestinaBeeClicked()
+    {
+        bool comprou = BeeManager.Instancia.TrySpawnBee("NordestinaBee");
+        if (!comprou)
+        {
+            // Feedback de erro
+            Debug.Log("Não foi possível comprar a Abelha.");
+        }
+    }
+
+    public void OnBuyJandairaBeeClicked()
+    {
+        bool comprou = BeeManager.Instancia.TrySpawnBee("JandairaBee");
+        if (!comprou)
+        {
+            // Feedback de erro
+            Debug.Log("Não foi possível comprar a Abelha.");
+        }
+    }
+
+
+    public void OnBuyBoraBeeClicked()
+    {
+        bool comprou = BeeManager.Instancia.TrySpawnBee("BoraBee");
+        if (!comprou)
+        {
+            // Feedback de erro
+            Debug.Log("Não foi possível comprar a Abelha.");
+        }
+    }
+
     /// <summary>
     /// Chamado pelo botão para comprar a QueenBee.
     /// </summary>
@@ -59,6 +91,11 @@ public class BeeUpgradeButton : MonoBehaviour
         {
             // Feedback de erro
             Debug.Log("Não foi possível comprar QueenBee.");
+        }
+        else if (queenBeeTutorial != null && TutorialManager.Instancia != null)
+        {
+            // Pede ao TutorialManager para mostrar o tutorial da Rainha
+            TutorialManager.Instancia.RequestTutorial(queenBeeTutorial);
         }
     }
     

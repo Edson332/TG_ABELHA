@@ -32,6 +32,8 @@ public class BeeManager : MonoBehaviour
         public float incomePerSecond = 0f;
         [Tooltip("Marque esta opção se esta for uma das abelhas primárias (Worker, Producer, Guard).")]
         public bool isPrimary = false;
+
+        
         
         [HideInInspector]
         public int currentCount;
@@ -135,6 +137,8 @@ public class BeeManager : MonoBehaviour
             PlayerPrefs.SetInt("QueenPurchased", 1);
             PlayerPrefs.Save(); // Força o salvamento imediato no disco.
             Debug.Log("FLAG SALVA: O status da Abelha Rainha foi salvo como 1.");
+
+            
         }
 
         if (data.beeType == "GuardBee")

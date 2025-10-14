@@ -170,7 +170,7 @@ public class CombatManager : MonoBehaviour
     private void ProcessCombatResult(bool playerWon)
     {
         currentCombatState = CombatState.Resolving;
-        isCombatActive = false;
+        //isCombatActive = false;
 
         Debug.Log(playerWon ? "Jogador VENCEU o combate!" : "Jogador foi DERROTADO.");
 
@@ -231,7 +231,7 @@ public class CombatManager : MonoBehaviour
         if (mainGameCamera != null) mainGameCamera.gameObject.SetActive(true);
 
         AudioManager.Instancia.PlayMusic("MainBGM");
-        
+        isCombatActive = false;
         currentCombatState = CombatState.Finished; 
 
         if (InvasionScheduler.Instancia != null)

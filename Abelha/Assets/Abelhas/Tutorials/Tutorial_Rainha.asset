@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 202003654713ae34a8bbabe74f94822b, type: 3}
+  m_Name: Tutorial_Rainha
+  m_EditorClassIdentifier: 
+  tutorialID: QUEEN_BEE_INTRO
+  tutorialText: "A Abelha Rainha!\nEla possui uma aura especial que aumenta a produtividade
+    de todas as abelhas pr\xF3ximas.\nDiferente das outras, voc\xEA pode control\xE1-la!
+    Use o clique do mouse para mov\xEA-la pelo mapa e posicion\xE1-la estrategicamente
+    para maximizar seus b\xF4nus."
+  showOnlyOnce: 1

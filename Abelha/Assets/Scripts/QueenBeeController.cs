@@ -27,8 +27,9 @@ public static QueenBeeController Instancia { get; private set; }
 
     [Header("Visual")]
     public GameObject auraVisualEffect;
-    
+
     private NavMeshAgent agent;
+    private Animator _animator;
     private Collider[] _collidersInAura = new Collider[150]; // Aumente se tiver muitas abelhas
     private HashSet<GameObject> _beesInAura = new HashSet<GameObject>(); // Rastreia GameObjects
     private float _checkTimer;
@@ -37,6 +38,7 @@ public static QueenBeeController Instancia { get; private set; }
 
     void Awake()
     {
+        _animator = GetComponentInChildren<Animator>();
         if (Instancia != null && Instancia != this)
         {
             Debug.LogWarning("Já existe uma Abelha Rainha! Destruindo esta.");
@@ -58,6 +60,7 @@ public static QueenBeeController Instancia { get; private set; }
 
     void Update()
     {
+        UpdateAnimator();
         _checkTimer -= Time.deltaTime;
         if (_checkTimer <= 0f)
         {
@@ -65,7 +68,19 @@ public static QueenBeeController Instancia { get; private set; }
             _checkTimer = checkInterval;
         }
     }
+    
+    private void UpdateAnimator()
+    {
+        if (_animator == null) return;
 
+        // Pega a velocidade atual do NavMeshAgent
+        // A dividimos pela velocidade máxima do agente para obter um valor normalizado (entre 0 e 1),
+        // o que é uma prática comum e robusta para animators.
+        float normalizedSpeed = agent.velocity.magnitude / agent.speed;
+
+        // Envia o valor para o parâmetro "Speed" no Animator Controller
+        _animator.SetFloat("Speed", normalizedSpeed);
+    }
 
 
     /// <summary>
