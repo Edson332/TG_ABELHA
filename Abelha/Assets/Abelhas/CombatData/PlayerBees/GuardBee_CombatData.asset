@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GuardBee_CombatData
   m_EditorClassIdentifier: 
   combatantName: GuardBee
-  icon: {fileID: 21300000, guid: 9a12e8f0262f5414799420a815811317, type: 3}
+  icon: {fileID: 21300000, guid: 2aca4b6a64701c447a334f4fbac90974, type: 3}
   modelPrefab3D: {fileID: 6837250187578376292, guid: 91fdf7c4886a35e4d8654a2de5acc7fe, type: 3}
   baseMaxHP: 200
   baseAttack: 20

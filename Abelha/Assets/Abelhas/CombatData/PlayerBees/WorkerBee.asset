@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WorkerBee
   m_EditorClassIdentifier: 
   combatantName: WorkerBeeCombat
-  icon: {fileID: 21300000, guid: 3a27ea8adec4a5841ad76f606d1e5b43, type: 3}
+  icon: {fileID: 21300000, guid: fc637f5893e357141892ce2767ca2dc5, type: 3}
   modelPrefab3D: {fileID: 5664306715742136241, guid: 0714ea7a49512b144a2f80a4af4802c3, type: 3}
   baseMaxHP: 100
   baseAttack: 10

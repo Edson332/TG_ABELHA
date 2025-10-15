@@ -1,110 +1,131 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using System.Collections.Generic; // Adicionado para usar Listas
+using System.Collections.Generic;
 using TMPro;
+
+// A classe auxiliar permanece a mesma
+[System.Serializable]
+public class AchievementUIEntry
+{
+    public Button button;
+    public GameObject notificationIcon;
+}
 
 public class MenuManager : MonoBehaviour
 {
     public static MenuManager Instancia { get; private set; } 
+
     [Header("Panels")]
     public GameObject mainMenuPanel;
     public GameObject upgradeMenuPanel;
     public GameObject upgradeTAB;
     public GameObject buyTAB;
     public GameObject structureTAB;
-    [Header("Dependencies")]
-    public AchievementManager achievementManager; // Must be assigned in Inspector
-    
-    // Usar Listas é mais flexível que arrays, mas a lógica é a mesma
-    public List<GameObject> achievementPanels = new List<GameObject>(); 
-    [Header("Buttons")]
-    public List<Button> menuButtons = new List<Button>();
 
-    [Header("Notifications")]
-    public GameObject achievementNotificationSymbol;
+    [Header("Dependencies")]
+    public AchievementManager achievementManager;
+    public List<GameObject> achievementPanels = new List<GameObject>(); 
+
+    [Header("UI de Conquistas")]
+    [Tooltip("O ícone de notificação GLOBAL que fica sobre o botão principal de conquistas.")]
+    public GameObject globalAchievementNotification;
+    [Tooltip("Associe cada botão de conquista e seu respectivo ícone de notificação aqui.")]
+    public List<AchievementUIEntry> achievementUIEntries = new List<AchievementUIEntry>();
+    
+    // A lista 'menuButtons' antiga foi removida por ser redundante.
 
     private void Awake()
     {
         if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
         Instancia = this;
     }
+
     void Start()
     {
-        // Garante que o achievementManager foi atribuído
         if (achievementManager == null)
         {
             Debug.LogError("AchievementManager não foi atribuído no Inspector do MenuManager!", this);
             return;
         }
 
-        // Inicializa todos os painéis de achievement como inativos
+        // Inicializa todos os painéis de detalhe como inativos
         foreach (GameObject panel in achievementPanels)
         {
             if(panel != null) panel.SetActive(false);
         }
         
-        // Configura os listeners dos botões
-        for (int i = 0; i < menuButtons.Count; i++)
+        // Configura os listeners dos botões usando a nova lista unificada
+        for (int i = 0; i < achievementUIEntries.Count; i++)
         {
             int index = i; // Importante para o closure
-            if(menuButtons[i] != null)
+            if(achievementUIEntries[i].button != null)
             {
-                menuButtons[i].onClick.RemoveAllListeners(); // Limpa listeners antigos para segurança
-                menuButtons[i].onClick.AddListener(() => ShowAchievementPanel(index));
+                achievementUIEntries[i].button.onClick.RemoveAllListeners();
+                achievementUIEntries[i].button.onClick.AddListener(() => ShowAchievementPanel(index));
             }
         }
 
-        if (achievementManager == null) { Debug.LogError("AchievementManager não foi atribuído no Inspector do MenuManager!", this); return; }
-        foreach (GameObject panel in achievementPanels) { if(panel != null) panel.SetActive(false); }
-        for (int i = 0; i < menuButtons.Count; i++) { int index = i; if(menuButtons[i] != null) { menuButtons[i].onClick.RemoveAllListeners(); menuButtons[i].onClick.AddListener(() => ShowAchievementPanel(index)); } }
-        UpdateMenuButtons();
+        // Chama a atualização uma vez no início para definir o estado inicial
+        UpdateAllAchievementUI();
     }
 
     void Update()
     {
-
-        UpdateMenuButtons();
-
-        if (achievementManager != null && achievementNotificationSymbol != null)
-        {
-            // Mostra o símbolo se houver conquistas novas, esconde se não houver.
-            bool shouldShowNotification = achievementManager.HasUnviewedAchievements();
-            if (achievementNotificationSymbol.activeSelf != shouldShowNotification)
-            {
-                achievementNotificationSymbol.SetActive(shouldShowNotification);
-            }
-        }
+        // O Update agora chama o método de atualização correto e completo.
+        UpdateAllAchievementUI();
     }
 
     /// <summary>
-    /// Atualiza a aparência e a interatividade de cada botão com base na conquista correspondente.
+    /// Um método central que atualiza TUDO relacionado à UI de conquistas.
     /// </summary>
-    public void UpdateMenuButtons()
+    public void UpdateAllAchievementUI()
     {
-        for (int i = 0; i < menuButtons.Count; i++)
+        if (achievementManager == null) return;
+
+        // --- LÓGICA DO ÍCONE GLOBAL ---
+        if (globalAchievementNotification != null)
         {
-            if (i < achievementManager.achievements.Length)
+            bool shouldShowGlobal = achievementManager.HasUnviewedAchievements();
+            if (globalAchievementNotification.activeSelf != shouldShowGlobal)
             {
-                Achievement achievement = achievementManager.achievements[i];
-                Button button = menuButtons[i];
-                
-                if (button == null) continue; // Pula se o botão não estiver na lista
+                globalAchievementNotification.SetActive(shouldShowGlobal);
+            }
+        }
 
-                TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
-                Image buttonImage = button.GetComponent<Image>();
+        // --- LÓGICA DOS BOTÕES E ÍCONES ESPECÍFICOS ---
+        for (int i = 0; i < achievementUIEntries.Count; i++)
+        {
+            if (i >= achievementManager.achievements.Length) continue;
 
-                if (achievement.isUnlocked)
+            Achievement achievement = achievementManager.achievements[i];
+            AchievementUIEntry uiEntry = achievementUIEntries[i];
+            
+            if (uiEntry.button == null) continue;
+
+            TextMeshProUGUI buttonText = uiEntry.button.GetComponentInChildren<TextMeshProUGUI>();
+            Image buttonImage = uiEntry.button.GetComponent<Image>();
+
+            // Atualiza a aparência do botão (bloqueado/desbloqueado)
+            if (achievement.isUnlocked)
+            {
+                uiEntry.button.interactable = true;
+                if(buttonText != null) buttonText.text = achievement.title;
+                if(buttonImage != null) buttonImage.color = Color.white;
+            }
+            else
+            {
+                uiEntry.button.interactable = false;
+                if(buttonText != null) buttonText.text = "???";
+                if(buttonImage != null) buttonImage.color = Color.grey;
+            }
+
+            // Atualiza a visibilidade do ícone de notificação específico
+            if (uiEntry.notificationIcon != null)
+            {
+                bool shouldShowSpecific = achievement.isUnlocked && !achievement.hasBeenViewed;
+                if (uiEntry.notificationIcon.activeSelf != shouldShowSpecific)
                 {
-                    button.interactable = true;
-                    if(buttonText != null) buttonText.text = achievement.title;
-                    if(buttonImage != null) buttonImage.color = Color.white;
-                }
-                else
-                {
-                    button.interactable = false;
-                    if(buttonText != null) buttonText.text = "???";
-                    if(buttonImage != null) buttonImage.color = Color.grey;
+                    uiEntry.notificationIcon.SetActive(shouldShowSpecific);
                 }
             }
         }
@@ -119,6 +140,7 @@ public class MenuManager : MonoBehaviour
         {
             if (achievementManager.achievements[panelIndex].isUnlocked)
             {
+                
 
                 achievementManager.achievements[panelIndex].hasBeenViewed = true;
                 Debug.Log($"Conquista '{achievementManager.achievements[panelIndex].title}' marcada como vista.");
