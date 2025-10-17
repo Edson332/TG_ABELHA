@@ -9,6 +9,8 @@ public class Achievement
     public Sprite icon;
     public bool isUnlocked;
 
+    
+
     public bool hasBeenViewed;
     // public float progress; // 0-1 for progress bars (opcional)
 }
@@ -58,6 +60,7 @@ public void UnlockAchievement(int index)
 
         int statusDaRainha = PlayerPrefs.GetInt("QueenPurchased", 0);
         int statusDaGuarda = PlayerPrefs.GetInt("GuardPurchased", 0);
+        int statusDaEuropa = PlayerPrefs.GetInt("EuropaPurchased", 0);
 
         // Exemplo: se houver pelo menos 2 unidades de Mel Processado, desbloqueia o achievement de índice 1.
         if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Mel) >= 2)
@@ -94,6 +97,11 @@ public void UnlockAchievement(int index)
         if (statusDaGuarda == 1)
         {
             UnlockAchievement(6);
+        }
+
+        if (statusDaGuarda == 1)
+        {
+            UnlockAchievement(7);
         }
 
 

@@ -5,8 +5,12 @@ public class AchievementMenu : MonoBehaviour
 {
     public static AchievementMenu Instancia { get; private set; }
     
-    [Tooltip("O painel principal que contém a lista de botões de conquista.")]
-    public GameObject achievementPanel;
+    [Header("Painéis de Conquistas")]
+    [Tooltip("O painel principal que contém a lista de conquistas primárias.")]
+    public GameObject primaryAchievementPanel; // RENOMEADO para clareza
+
+    [Tooltip("O painel secundário para as conquistas de abelhas raras.")]
+    public GameObject secondaryAchievementPanel; // <<<--- NOVO CAMPO
 
     private void Awake()
     {
@@ -14,34 +18,78 @@ public class AchievementMenu : MonoBehaviour
         Instancia = this;
     }
     
-    /// <summary>
-    /// Mostra/esconde o painel principal de conquistas. Chamado pelo botão da UI.
-    /// </summary>
-    public void TogglePanel()
-    {
-        bool shouldBeActive = !achievementPanel.activeSelf;
+    // --- MÉTODOS PÚBLICOS PARA OS BOTÕES ---
 
-        // Primeiro, garante que o outro painel principal (Upgrades) esteja fechado.
+    /// <summary>
+    /// Abre/Fecha o menu de conquistas principal. Chamado pelo botão principal da UI.
+    /// </summary>
+    public void TogglePrimaryPanel()
+    {
+        // Se o painel primário já está ativo, fecha tudo.
+        // Se não, abre o primário (e garante que o secundário esteja fechado).
+        bool shouldBeActive = !primaryAchievementPanel.activeSelf;
+
+        // Fecha outros menus principais, como o de upgrades
         if (MenuManager.Instancia != null)
         {
             MenuManager.Instancia.CloseUpgradePanels();
         }
         
-        // Então, ativa ou desativa o painel de conquistas.
-        if (achievementPanel != null)
+        // Garante que o painel secundário esteja sempre fechado ao alternar o primário
+        if (secondaryAchievementPanel != null)
         {
-            achievementPanel.SetActive(shouldBeActive);
+            secondaryAchievementPanel.SetActive(false);
+        }
+
+        // Define o estado do painel primário
+        if (primaryAchievementPanel != null)
+        {
+            primaryAchievementPanel.SetActive(shouldBeActive);
         }
     }
 
     /// <summary>
-    /// Apenas fecha este painel. Chamado por outros scripts.
+    /// Fecha o painel primário e abre o secundário. Chamado pelo botão "Conquistas Raras".
     /// </summary>
-    public void ClosePanel()
+    public void ShowSecondaryPanel()
     {
-        if (achievementPanel != null)
+        if (primaryAchievementPanel != null)
         {
-            achievementPanel.SetActive(false);
+            primaryAchievementPanel.SetActive(false);
+        }
+        if (secondaryAchievementPanel != null)
+        {
+            secondaryAchievementPanel.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// Fecha o painel secundário e volta para o primário. Chamado pelo botão "Voltar".
+    /// </summary>
+    public void ShowPrimaryPanel()
+    {
+        if (secondaryAchievementPanel != null)
+        {
+            secondaryAchievementPanel.SetActive(false);
+        }
+        if (primaryAchievementPanel != null)
+        {
+            primaryAchievementPanel.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// Apenas fecha todos os painéis de conquista. Chamado por outros scripts (como o MenuManager).
+    /// </summary>
+    public void CloseAllPanels()
+    {
+        if (primaryAchievementPanel != null)
+        {
+            primaryAchievementPanel.SetActive(false);
+        }
+        if (secondaryAchievementPanel != null)
+        {
+            secondaryAchievementPanel.SetActive(false);
         }
     }
 }

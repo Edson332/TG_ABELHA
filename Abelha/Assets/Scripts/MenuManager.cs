@@ -24,6 +24,8 @@ public class MenuManager : MonoBehaviour
 
     [Header("Dependencies")]
     public AchievementManager achievementManager;
+
+    
     public List<GameObject> achievementPanels = new List<GameObject>(); 
 
     [Header("UI de Conquistas")]
@@ -213,13 +215,13 @@ public class MenuManager : MonoBehaviour
         CloseUpgradePanels();
         if (AchievementMenu.Instancia != null)
         {
-            AchievementMenu.Instancia.ClosePanel();
+            AchievementMenu.Instancia.CloseAllPanels();
         }
 
         // Ativa o HUD principal do jogo se ele estiver desativado
         if (mainMenuPanel != null && !mainMenuPanel.activeSelf)
         {
-            AchievementMenu.Instancia.TogglePanel();
+            //AchievementMenu.Instancia.TogglePrimaryPanel();
             mainMenuPanel.SetActive(true);
         }
     }
@@ -238,11 +240,15 @@ public class MenuManager : MonoBehaviour
     {
         // 1. Verifica qual deve ser o próximo estado do painel de upgrades
         bool shouldBeActive = !upgradeMenuPanel.activeSelf;
-
+        if (AchievementMenu.Instancia != null)
+        {
+            // --- MUDANÇA AQUI ---
+            AchievementMenu.Instancia.CloseAllPanels(); // Chamando o método renomeado
+        }
         // 2. Fecha todos os outros painéis principais primeiro
         if (AchievementMenu.Instancia != null)
         {
-            AchievementMenu.Instancia.ClosePanel();
+            AchievementMenu.Instancia.CloseAllPanels();
         }
         // Adicione aqui outros painéis principais para fechar se houver no futuro
 

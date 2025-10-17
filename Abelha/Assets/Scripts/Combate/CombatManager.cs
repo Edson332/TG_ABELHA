@@ -89,7 +89,7 @@ public class CombatManager : MonoBehaviour
         currentOperatingWave = enemyWave;
         currentCombatState = CombatState.Preparing;
         isCombatActive = true;
-        fatorconquista = 0;
+        //fatorconquista = 0;
          AudioManager.Instancia.PlayMusic("CombatBGM");
 
         if (mainGameCamera != null) mainGameCamera.gameObject.SetActive(false);

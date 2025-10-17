@@ -149,6 +149,16 @@ public class BeeManager : MonoBehaviour
             PlayerPrefs.Save(); // Força o salvamento imediato no disco.
             Debug.Log("FLAG SALVA: O status da Abelha Guarda foi salvo como 1.");
         }
+
+
+        if (data.beeType == "EuropaBee")
+        {
+            // PlayerPrefs salva um par de "chave" e "valor" no dispositivo.
+            // A chave é "QueenPurchased", o valor é 1.
+            PlayerPrefs.SetInt("EuropaPurchased", 1);
+            PlayerPrefs.Save(); // Força o salvamento imediato no disco.
+            Debug.Log("FLAG SALVA: O status da Abelha Europa foi salvo como 1.");
+        }
         // Anuncia a mudança na contagem para o sistema de achievements, etc.
 
         return true;
