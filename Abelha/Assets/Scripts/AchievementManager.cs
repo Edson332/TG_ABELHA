@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic; 
+using System.Linq;
 
 [System.Serializable]
 public class Achievement
@@ -17,6 +19,56 @@ public class Achievement
 
 public class AchievementManager : MonoBehaviour
 {
+
+    public static AchievementManager Instancia { get; private set; }
+    private void Awake()
+    {
+        if (Instancia != null && Instancia != this)
+        {
+            // Se já existe uma instância e não sou eu, me destruo.
+            Debug.LogWarning("Instância duplicada do AchievementManager encontrada. Destruindo esta.", this.gameObject);
+            Destroy(gameObject);
+            return;
+        }
+        Instancia = this;
+        // Garante que este objeto não seja destruído ao carregar uma nova cena
+        // (essencial se você tiver um menu principal e uma cena de jogo)
+        DontDestroyOnLoad(gameObject);
+        Debug.Log("AchievementManager inicializado como Singleton persistente.");
+    }
+    public List<AchievementSaveData> GetAchievementsForSave()
+    {
+        List<AchievementSaveData> dataToSave = new List<AchievementSaveData>();
+        for (int i = 0; i < achievements.Length; i++)
+        {
+            dataToSave.Add(new AchievementSaveData {
+                index = i,
+                isUnlocked = achievements[i].isUnlocked,
+                hasBeenViewed = achievements[i].hasBeenViewed
+            });
+        }
+        return dataToSave;
+    }
+
+    // --- NOVO MÉTODO PARA CARREGAR ---
+    /// <summary>
+    /// Aplica o estado salvo às conquistas.
+    /// </summary>
+    public void LoadAchievementStatus(List<AchievementSaveData> savedData)
+    {
+        if (savedData == null) return;
+
+        foreach (var savedEntry in savedData)
+        {
+            // Encontra a conquista correspondente pelo índice
+            if (savedEntry.index >= 0 && savedEntry.index < achievements.Length)
+            {
+                achievements[savedEntry.index].isUnlocked = savedEntry.isUnlocked;
+                achievements[savedEntry.index].hasBeenViewed = savedEntry.hasBeenViewed;
+            }
+        }
+        Debug.Log("Estado das conquistas carregado.");
+    }
 
     public Achievement[] achievements;
     

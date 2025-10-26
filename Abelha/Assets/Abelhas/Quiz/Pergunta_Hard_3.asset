@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4455832e86d6e734790b38b9b40bfe16, type: 3}
+  m_Name: Pergunta_Hard_3
+  m_EditorClassIdentifier: 
+  questionText: "Abelhas sem ferr\xE3o (Meliponini), como a Janda\xEDra, n\xE3o usam
+    favos hexagonais. Onde elas armazenam o mel e o p\xF3len?"
+  answers:
+  - Favos de cria
+  - Potes de cerume
+  - "C\xE9lulas reais"
+  correctAnswerIndex: 1

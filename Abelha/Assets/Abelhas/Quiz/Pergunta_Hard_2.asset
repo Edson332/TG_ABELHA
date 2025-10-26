@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4455832e86d6e734790b38b9b40bfe16, type: 3}
+  m_Name: Pergunta_Hard_2
+  m_EditorClassIdentifier: 
+  questionText: "A abelha gigante asi\xE1tica (Apis dorsata) n\xE3o constr\xF3i dentro
+    de cavidades. Que tipo de ninho ela constr\xF3i?"
+  answers:
+  - Ninho de barro
+  - "Colmeia em \xE1rvore oca"
+  - Ninho aberto
+  correctAnswerIndex: 2

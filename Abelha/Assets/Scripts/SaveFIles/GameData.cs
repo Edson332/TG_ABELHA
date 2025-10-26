@@ -1,63 +1,45 @@
-
+// Scripts/GameSystems/GameData.cs
 using System.Collections.Generic;
+using UnityEngine; // Adicionado para TipoRecurso, se estiver definido aqui
 
-// [System.Serializable] é essencial! Ele diz ao Unity que esta classe
-// e seus campos podem ser convertidos para formatos como JSON.
+// --- ESTRUTURAS AUXILIARES ---
 [System.Serializable]
+public class ResourceData { public TipoRecurso type; public float amount; }
+
+[System.Serializable]
+public class BeeCountData { public string beeType; public int currentCount; }
+
+[System.Serializable]
+public class BeeUpgradeSaveData { public string beeTypeName; public int nectarLevel; public int productionLevel; public int speedLevel; public int combatHealthLevel; public int combatAttackLevel; }
+
+[System.Serializable]
+public class AchievementSaveData { public int index; public bool isUnlocked; public bool hasBeenViewed; }
+
+[System.Serializable]
+public class RoyalJellyUpgradeSaveData { public string upgradeID; public int level; }
+
+
+// --- CLASSE PRINCIPAL GameData (COM O ATRIBUTO ESSENCIAL) ---
+[System.Serializable] // <<<--- ESTA LINHA É CRUCIAL
 public class GameData
 {
-    // --- Recursos ---
-    // Usamos um dicionário serializável ou uma lista para os recursos.
-    // JsonUtility do Unity não serializa dicionários diretamente, então uma lista é mais fácil.
     public List<ResourceData> resourceAmounts;
-
-    // --- Abelhas ---
     public List<BeeCountData> beeCounts;
-
-    // --- Upgrades ---
     public List<BeeUpgradeSaveData> beeUpgradeLevels;
-
-    // --- Tutoriais ---
-    // HashSet também não é serializado por JsonUtility, então usamos uma lista.
     public List<string> completedTutorialIDs;
+    // public bool hasQueenBeeBeenPurchasedEver; // Removido se não estiver usando
+    public List<AchievementSaveData> achievementStatus;
+    public List<RoyalJellyUpgradeSaveData> royalJellyUpgradeLevels;
 
-    // --- Construtor Padrão ---
-    // Define os valores para um jogo novo.
+    // Construtor Padrão
     public GameData()
     {
         resourceAmounts = new List<ResourceData>();
         beeCounts = new List<BeeCountData>();
         beeUpgradeLevels = new List<BeeUpgradeSaveData>();
         completedTutorialIDs = new List<string>();
+        // hasQueenBeeBeenPurchasedEver = false; // Removido
+        achievementStatus = new List<AchievementSaveData>();
+        royalJellyUpgradeLevels = new List<RoyalJellyUpgradeSaveData>();
     }
-}
-
-
-// --- Classes Auxiliares para Serialização ---
-
-[System.Serializable]
-public class ResourceData
-{
-    public TipoRecurso type;
-    public float amount;
-}
-
-[System.Serializable]
-public class BeeCountData
-{
-    public string beeType;
-    public int currentCount;
-    // maxCount geralmente não é salvo, pois é parte do design, a menos que seja atualizável.
-}
-
-[System.Serializable]
-public class BeeUpgradeSaveData
-{
-    public string beeTypeName;
-    public int nectarLevel;
-    public int productionLevel;
-    public int speedLevel;
-
-    public int combatHealthLevel; // --- ADICIONADO ---
-    public int combatAttackLevel; 
 }

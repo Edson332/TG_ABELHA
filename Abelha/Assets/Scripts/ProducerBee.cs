@@ -126,7 +126,7 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
         {
             // --- MUDANÇA 5: Aplicar os bônus da aura nos cálculos ---
             _effectiveProductionAmount = baseProductionAmount; // A quantidade base que ela tenta processar
-            
+
             // Multiplicadores dos upgrades
             float productionUpgradeMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.MelProduzido);
             float nectarUpgradeMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.NectarColetado);
@@ -142,7 +142,7 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
                 // Processar
                 yield return StartCoroutine(MoveToTarget(GetRandomDestination(_honeycombTarget.position)));
                 yield return new WaitForSeconds(baseProductionTime * finalTimeMultiplier); // Tempo reduzido pela aura
-                
+
                 // Depositar
                 yield return StartCoroutine(MoveToTarget(GetRandomDestination(_hiveTarget.position)));
                 yield return new WaitForSeconds(baseDepositTime * finalTimeMultiplier); // Tempo reduzido pela aura
@@ -169,6 +169,29 @@ public class ProducerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
 
             yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
         }
+    }
+    public float GetAverageHoneyPerSecond()
+    {
+        // 1. Calcula a quantidade de mel por ciclo
+        _effectiveProductionAmount = baseProductionAmount; // Ela pega do estoque
+        float productionUpgradeMultiplier = GerenciadorUpgrades.Instancia.GetMultiplier(beeTypeName, TipoUpgrade.MelProduzido);
+        // Aplica bônus da rainha se ela implementar IBoostableByQueen
+        bool isBoosted = false; // Substitua por _isInQueenAura se implementar
+        float queenAmountMult = 1f; // Substitua por _queenAmountMultiplier se implementar
+        float queenTimeMult = 1f; // Substitua por _queenTimeMultiplier se implementar
+
+        float finalProductionMultiplier = productionUpgradeMultiplier * (isBoosted ? queenAmountMult : 1f);
+        float melPerCycle = _effectiveProductionAmount * finalProductionMultiplier;
+
+        // 2. Calcula o tempo total estimado do ciclo
+        // (Assume que ela pega néctar do estoque, não considera o tempo de coleta na flor)
+        float finalProductionTime = baseProductionTime * (isBoosted ? queenTimeMult : 1f);
+        float finalDepositTime = baseDepositTime * (isBoosted ? queenTimeMult : 1f);
+        float totalCycleTime = finalProductionTime + finalDepositTime + 1.0f; // Tempo estimado para viagem/pausa
+
+        // 3. Calcula Mel por Segundo
+        if (totalCycleTime <= 0) return 0;
+        return melPerCycle / totalCycleTime;
     }
 
     private Vector3 GetRandomDestination(Vector3 basePosition)

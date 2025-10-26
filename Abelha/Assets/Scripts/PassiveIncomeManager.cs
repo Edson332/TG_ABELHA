@@ -10,6 +10,7 @@ public class PassiveIncomeManager : MonoBehaviour
     private List<PassiveBee> _activePassiveBees = new List<PassiveBee>();
 
     private float _totalBaseIncomePerSecond = 0f;
+    private float _lastCalculatedIncomePerSecond = 0f;
 
     void Awake()
     {
@@ -17,9 +18,13 @@ public class PassiveIncomeManager : MonoBehaviour
         Instancia = this;
     }
 
-     void Update()
+    void Update()
     {
-        if (_activePassiveBees.Count == 0) return;
+        if (_activePassiveBees.Count == 0)
+        {
+            _lastCalculatedIncomePerSecond = 0f; // Reseta se não houver abelhas
+            return;
+        }
 
         float totalIncomeThisFrame = 0f;
         float queenMultiplier = 1f; // Padrão é 1x (sem bônus)
@@ -29,6 +34,7 @@ public class PassiveIncomeManager : MonoBehaviour
         {
             queenMultiplier = QueenBeeController.Instancia.nectarAmountMultiplier;
         }
+        float totalIncomePerSecond = 0f;
 
         // Itera por todas as abelhas passivas ativas
         foreach (var bee in _activePassiveBees)
@@ -46,18 +52,32 @@ public class PassiveIncomeManager : MonoBehaviour
                 }
             }
             totalIncomeThisFrame += currentBeeIncome * Time.deltaTime;
+            totalIncomePerSecond += currentBeeIncome;
+            
         }
-        
+
         if (RoyalJellyShopManager.Instancia != null)
         {
             float globalBonus = RoyalJellyShopManager.Instancia.GetGlobalProductionBonus();
             totalIncomeThisFrame *= (1f + globalBonus); // Ex: 1 + 0.10 = 1.10 (bônus de 10%)
         }
 
+        _lastCalculatedIncomePerSecond = totalIncomePerSecond;
+
+        // Adiciona a renda ao total (calculado por frame)
+        totalIncomeThisFrame = _lastCalculatedIncomePerSecond * Time.deltaTime;
+
         if (totalIncomeThisFrame > 0)
         {
             GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.Mel, totalIncomeThisFrame);
         }
+
+
+    }
+    
+    public float GetTotalPassiveIncomePerSecond()
+    {
+        return _lastCalculatedIncomePerSecond;
     }
 
     public void RegisterPassiveBee(PassiveBee bee)

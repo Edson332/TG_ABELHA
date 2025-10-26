@@ -69,6 +69,25 @@ public class WorkerBee : MonoBehaviour, BeeStatsUpdater, IBoostableByQueen
         agent.avoidancePriority = Random.Range(0, 100);
         StartCoroutine(StartWorker());
     }
+    public float GetAverageHoneyPerSecond()
+    {
+        // 1. Calcula a quantidade de mel por ciclo
+        _effectiveCollectionAmount = baseCollectionAmount * _currentNectarMultiplierFromUpgrades;
+        float finalCollectionAmount = _effectiveCollectionAmount * (_isInQueenAura ? _queenAmountMultiplier : 1f);
+        float finalProductionMultiplier = _currentProductionMultiplierFromUpgrades * (_isInQueenAura ? _queenAmountMultiplier : 1f);
+        float melPerCycle = finalCollectionAmount * finalProductionMultiplier;
+
+        // 2. Calcula o tempo total estimado do ciclo
+        // (Isso é uma simplificação, não considera o tempo de viagem)
+        float finalCollectionTime = baseCollectionTime * (_isInQueenAura ? _queenTimeMultiplier : 1f);
+        float finalProcessingTime = baseProcessingTime * (_isInQueenAura ? _queenTimeMultiplier : 1f);
+        float finalDepositTime = baseDepositTime * (_isInQueenAura ? _queenTimeMultiplier : 1f);
+        float totalCycleTime = finalCollectionTime + finalProcessingTime + finalDepositTime + 1.0f; // Adiciona um tempo estimado para viagem/pausa
+
+        // 3. Calcula Mel por Segundo
+        if (totalCycleTime <= 0) return 0; // Evita divisão por zero
+        return melPerCycle / totalCycleTime;
+    }
 
     private void OnEnable()
     {

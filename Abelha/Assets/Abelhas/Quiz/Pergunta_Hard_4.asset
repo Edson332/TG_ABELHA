@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4455832e86d6e734790b38b9b40bfe16, type: 3}
+  m_Name: Pergunta_Hard_4
+  m_EditorClassIdentifier: 
+  questionText: "\rNa colmeia da Apis mellifera (europeia), qual \xE9 a \xFAnica
+    casta que se desenvolve a partir de um ovo n\xE3o fertilizado?"
+  answers:
+  - "Zang\xE3o"
+  - Rainha
+  - "Oper\xE1ria"
+  correctAnswerIndex: 0

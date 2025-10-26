@@ -1,7 +1,7 @@
 // Scripts/Managers/RoyalJellyShopManager.cs
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 public class RoyalJellyShopManager : MonoBehaviour
 {
     public static RoyalJellyShopManager Instancia { get; private set; }
@@ -71,49 +71,83 @@ public class RoyalJellyShopManager : MonoBehaviour
     {
         int currentLevel = GetUpgradeLevel(upgrade.upgradeID);
         int cost = upgrade.costPerLevel[currentLevel];
-
-        // Deduz o custo
+        
         GerenciadorRecursos.Instancia.RemoverRecurso(TipoRecurso.GeleiaReal, cost);
 
-        // Aumenta o nível do upgrade
-        _upgradeLevels[upgrade.upgradeID] = currentLevel + 1;
-        Debug.Log($"Upgrade '{upgrade.displayName}' comprado! Novo nível: {currentLevel + 1}");
+        int newLevel = currentLevel + 1;
+        _upgradeLevels[upgrade.upgradeID] = newLevel;
+        Debug.Log($"Upgrade '{upgrade.displayName}' comprado! Novo nível: {newLevel}");
 
         if (correctAnswer)
         {
-            Debug.Log("Resposta correta! Aplicando bônus de 5%!");
-            // TODO: Adicionar lógica para aplicar o bônus. Pode ser um buff temporário
-            // ou um pequeno reembolso de recursos. Ex:
-            GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.GeleiaReal, Mathf.RoundToInt(cost * 0.15f));
+            GerenciadorRecursos.Instancia.AdicionarRecurso(TipoRecurso.GeleiaReal, Mathf.RoundToInt(cost * 0.05f));
         }
 
-        // Ativa o upgrade visual, se houver
-        ActivateVisualForUpgrade(upgrade);
+        // Ativa o upgrade visual correspondente ao novo nível
+        ActivateVisualForUpgradeLevel(upgrade, newLevel);
 
         // TODO: Salvar o progresso
     }
 
-    private void ActivateVisualForUpgrade(RoyalJellyUpgradeSO upgrade)
+    public List<RoyalJellyUpgradeSaveData> GetUpgradeLevelsForSave()
     {
-        int currentLevel = GetUpgradeLevel(upgrade.upgradeID); // O nível recém-adquirido
-        int visualIndex = currentLevel - 1; // Nível 1 ativa o objeto no índice 0
+        // Converte o dicionário para a lista serializável
+        return _upgradeLevels.Select(kvp => new RoyalJellyUpgradeSaveData { upgradeID = kvp.Key, level = kvp.Value }).ToList();
+    }
+
+    // --- NOVO MÉTODO PARA CARREGAR ---
+    /// <summary>
+    /// Carrega os níveis salvos dos upgrades de Geleia Real.
+    /// </summary>
+    public void LoadUpgradeLevels(List<RoyalJellyUpgradeSaveData> savedData)
+    {
+        _upgradeLevels = new Dictionary<string, int>(); // Limpa os níveis antigos
+        if (savedData == null) return;
+
+        // Preenche o dicionário com os dados carregados
+        foreach (var savedEntry in savedData)
+        {
+            _upgradeLevels[savedEntry.upgradeID] = savedEntry.level;
+
+            // --- ATIVA OS VISUAIS CORRESPONDENTES ---
+            // Encontra o SO do upgrade para saber qual visual ativar
+            var upgradeSO = allRoyalJellyUpgrades.Find(u => u.upgradeID == savedEntry.upgradeID);
+            if(upgradeSO != null)
+            {
+                // Reativa os visuais com base no nível carregado
+                for (int level = 1; level <= savedEntry.level; level++)
+                {
+                     ActivateVisualForUpgradeLevel(upgradeSO, level);
+                }
+            }
+        }
+        Debug.Log("Níveis de upgrades de Geleia Real carregados.");
+    }
+    
+    // Método auxiliar para ativar visual (renomeado do antigo ActivateVisualForUpgrade)
+     private void ActivateVisualForUpgradeLevel(RoyalJellyUpgradeSO upgrade, int levelToActivate)
+    {
+        int visualIndex = levelToActivate - 1; // Nível 1 ativa o índice 0
 
         switch (upgrade.visualEffect)
         {
             case VisualUpgradeType.Honeycomb:
-                if (visualIndex < honeycombVisualUpgrades.Count && honeycombVisualUpgrades[visualIndex] != null)
+                if (visualIndex >= 0 && visualIndex < honeycombVisualUpgrades.Count && honeycombVisualUpgrades[visualIndex] != null)
                 {
                     honeycombVisualUpgrades[visualIndex].SetActive(true);
                 }
                 break;
             case VisualUpgradeType.Flower:
-                if (visualIndex < flowerVisualUpgrades.Count && flowerVisualUpgrades[visualIndex] != null)
+                 if (visualIndex >= 0 && visualIndex < flowerVisualUpgrades.Count && flowerVisualUpgrades[visualIndex] != null)
                 {
                     flowerVisualUpgrades[visualIndex].SetActive(true);
                 }
                 break;
         }
     }
+    
+    // O método FinalizePurchase agora chama o método auxiliar de ativação visual
+
 
     public int GetUpgradeLevel(string upgradeID)
     {

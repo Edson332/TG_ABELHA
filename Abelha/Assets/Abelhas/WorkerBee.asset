@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantName: 
   beeTypeName: WorkerBee
-  nivelNectarColetado: 14
-  nivelMelProduzido: 2
-  nivelVelocidade: 3
+  nivelNectarColetado: 0
+  nivelMelProduzido: 0
+  nivelVelocidade: 0
   nivelVidaCombate: 0
   nivelAtaqueCombate: 0
   custoBaseNectar: 2

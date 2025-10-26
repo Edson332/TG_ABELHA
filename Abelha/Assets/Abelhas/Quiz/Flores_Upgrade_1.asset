@@ -17,4 +17,4 @@ MonoBehaviour:
   description: "Aumenta a quantidade de flores e a for\xE7a das abelhas em combate"
   icon: {fileID: 21300000, guid: 17ce495f54f89124da781c73dbd1ed24, type: 3}
   visualEffect: 2
-  costPerLevel: 0500000005000000
+  costPerLevel: 050000000a0000001400000028000000320000003c000000500000006400000096000000c8000000

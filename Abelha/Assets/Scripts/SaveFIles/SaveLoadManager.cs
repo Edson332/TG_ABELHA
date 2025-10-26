@@ -1,7 +1,7 @@
 // Scripts/GameSystems/SaveLoadManager.cs
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq; // Essencial para usar .ToList() em um HashSet
+using System.Linq;
 
 public class SaveLoadManager : MonoBehaviour
 {
@@ -9,95 +9,94 @@ public class SaveLoadManager : MonoBehaviour
 
     [Tooltip("Salva o jogo automaticamente ao fechar a aplicação.")]
     public bool saveOnQuit = true;
-
-    // Referências para os gerentes
-    private GerenciadorRecursos _recursos;
-    private BeeManager _beeManager;
-    private GerenciadorUpgrades _upgrades;
-    private TutorialManager _tutorialManager;
-
+    
+    // Não precisamos mais das variáveis privadas _recursos, _beeManager, etc.
+    // Vamos buscar as instâncias diretamente quando precisarmos delas.
 
     void Awake()
     {
-        if (Instancia != null && Instancia != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instancia != null && Instancia != this) { Destroy(gameObject); return; }
         Instancia = this;
         DontDestroyOnLoad(gameObject);
     }
 
     void Start()
     {
-        // Cache das instâncias dos gerentes
-        _recursos = GerenciadorRecursos.Instancia;
-        _beeManager = BeeManager.Instancia;
-        _upgrades = GerenciadorUpgrades.Instancia;
-        _tutorialManager = TutorialManager.Instancia;
-
+        // Apenas chama o Load no Start
         LoadGameData();
     }
 
     private void OnApplicationQuit()
     {
-        if (saveOnQuit)
-        {
-            SaveGameData();
-        }
+       if (saveOnQuit) SaveGameData();
     }
 
-    public void SaveGameData()
+public void SaveGameData()
     {
-        if (!AreManagersReady()) {
-            Debug.LogError("Um ou mais gerentes não estão prontos. Save abortado.");
-            return;
+        // Busca as instâncias MAIS ATUAIS dos gerentes
+        GerenciadorRecursos recursos = GerenciadorRecursos.Instancia;
+        BeeManager beeManager = BeeManager.Instancia;
+        GerenciadorUpgrades upgrades = GerenciadorUpgrades.Instancia;
+        TutorialManager tutorialManager = TutorialManager.Instancia;
+        AchievementManager achievementManager = AchievementManager.Instancia;
+        RoyalJellyShopManager royalJellyShopManager = RoyalJellyShopManager.Instancia;
+
+        // --- VERIFICAÇÃO DETALHADA ---
+        bool errorFound = false;
+        if (recursos == null) { Debug.LogError("SALVAR ERRO: GerenciadorRecursos.Instancia é null!"); errorFound = true; }
+        if (beeManager == null) { Debug.LogError("SALVAR ERRO: BeeManager.Instancia é null!"); errorFound = true; }
+        if (upgrades == null) { Debug.LogError("SALVAR ERRO: GerenciadorUpgrades.Instancia é null!"); errorFound = true; }
+        if (tutorialManager == null) { Debug.LogError("SALVAR ERRO: TutorialManager.Instancia é null!"); errorFound = true; }
+        if (achievementManager == null) { Debug.LogError("SALVAR ERRO: AchievementManager.Instancia é null!"); errorFound = true; }
+        if (royalJellyShopManager == null) { Debug.LogError("SALVAR ERRO: RoyalJellyShopManager.Instancia é null!"); errorFound = true; }
+
+        if (errorFound)
+        {
+            Debug.LogError("SALVAR: Um ou mais gerentes não foram encontrados (Instancia == null). Save abortado.");
+            return; // Aborta o save se algum gerente crucial faltar
         }
+        // --- FIM DA VERIFICAÇÃO DETALHADA ---
 
         GameData data = new GameData();
+        Debug.Log("Coletando dados para salvar...");
 
-        // 1. Coletar Recursos (exceto Mel Processado)
+        // 1. Recursos
         foreach(TipoRecurso tipo in System.Enum.GetValues(typeof(TipoRecurso)))
         {
             if (tipo == TipoRecurso.MelProcessado) continue;
-            data.resourceAmounts.Add(new ResourceData { type = tipo, amount = _recursos.ObterRecurso(tipo) });
+            data.resourceAmounts.Add(new ResourceData { type = tipo, amount = recursos.ObterRecurso(tipo) });
         }
+        // 2. Contagem de Abelhas
+        foreach(var beeTypeData in beeManager.beeTypes) { data.beeCounts.Add(new BeeCountData { beeType = beeTypeData.beeType, currentCount = beeTypeData.currentCount }); }
+        // 3. Níveis de Upgrade de Abelhas
+        foreach(var upgradeDataSO in upgrades.todosTiposUpgradeData) { data.beeUpgradeLevels.Add(new BeeUpgradeSaveData { beeTypeName = upgradeDataSO.beeTypeName, nectarLevel = upgradeDataSO.nivelNectarColetado, productionLevel = upgradeDataSO.nivelMelProduzido, speedLevel = upgradeDataSO.nivelVelocidade, combatHealthLevel = upgradeDataSO.nivelVidaCombate, combatAttackLevel = upgradeDataSO.nivelAtaqueCombate }); }
+        // 4. Tutoriais Completos
+        data.completedTutorialIDs = tutorialManager.GetCompletedTutorials().ToList();
+        // 5. Marcos (Removido)
+        // 6. Estado das Conquistas
+        data.achievementStatus = achievementManager.GetAchievementsForSave();
+        // 7. Níveis de Upgrades de Geleia Real
+        data.royalJellyUpgradeLevels = royalJellyShopManager.GetUpgradeLevelsForSave();
 
-        // 2. Coletar Contagem de Abelhas
-        foreach(var beeTypeData in _beeManager.beeTypes)
-        {
-            data.beeCounts.Add(new BeeCountData { beeType = beeTypeData.beeType, currentCount = beeTypeData.currentCount });
-        }
-
-        // 3. Coletar Níveis de Upgrade
-        foreach(var upgradeDataSO in _upgrades.todosTiposUpgradeData)
-        {
-            data.beeUpgradeLevels.Add(new BeeUpgradeSaveData
-            {
-                beeTypeName = upgradeDataSO.beeTypeName,
-                nectarLevel = upgradeDataSO.nivelNectarColetado,
-                productionLevel = upgradeDataSO.nivelMelProduzido,
-                speedLevel = upgradeDataSO.nivelVelocidade,
-                combatHealthLevel = upgradeDataSO.nivelVidaCombate,   
-                combatAttackLevel = upgradeDataSO.nivelAtaqueCombate 
-            });
-        }
-
-        // --- 4. COLETAR TUTORIAIS COMPLETOS ---
-        if (_tutorialManager != null)
-        {
-            // Converte o HashSet para uma Lista para poder salvar em JSON
-            data.completedTutorialIDs = _tutorialManager.GetCompletedTutorials().ToList(); 
-        }
-
-        // Salvar os dados coletados
         SaveSystem.SaveGame(data);
     }
-
     public void LoadGameData()
     {
-        if (!AreManagersReady()) {
-            Debug.LogError("Um ou mais gerentes não estão prontos. Load abortado.");
+        // Busca as instâncias MAIS ATUAIS dos gerentes
+        GerenciadorRecursos recursos = GerenciadorRecursos.Instancia;
+        BeeManager beeManager = BeeManager.Instancia;
+        GerenciadorUpgrades upgrades = GerenciadorUpgrades.Instancia;
+        TutorialManager tutorialManager = TutorialManager.Instancia;
+        AchievementManager achievementManager = AchievementManager.Instancia;
+        RoyalJellyShopManager royalJellyShopManager = RoyalJellyShopManager.Instancia;
+
+        // Verifica se todos foram encontrados ANTES de prosseguir
+        if (recursos == null || beeManager == null || upgrades == null || tutorialManager == null || achievementManager == null || royalJellyShopManager == null)
+        {
+            Debug.LogError("CARREGAR: Um ou mais gerentes não foram encontrados (Instancia == null). Load abortado. Tentando configurar novo jogo...");
+            // Se não conseguiu carregar porque um gerente faltou, tenta iniciar um novo jogo
+            // Isso pode acontecer se houver um erro grave na inicialização de outro script
+            SetupNewGame(); 
             return;
         }
 
@@ -105,54 +104,62 @@ public class SaveLoadManager : MonoBehaviour
 
         if (data != null)
         {
-            // Jogo salvo encontrado, aplicando dados...
-            Debug.Log("Aplicando dados salvos aos sistemas do jogo...");
-
-            foreach(var resource in data.resourceAmounts) { _recursos.SetRecurso(resource.type, resource.amount); }
-            foreach(var beeCount in data.beeCounts) { _beeManager.SetCurrentCount(beeCount.beeType, beeCount.currentCount); }
-            if (_upgrades != null) _upgrades.LoadAllUpgradeLevels(data.beeUpgradeLevels);
+            Debug.Log("Aplicando dados salvos...");
+            // 1. Recursos
+            foreach(var resource in data.resourceAmounts) { recursos.SetRecurso(resource.type, resource.amount); }
+            // 2. Contagem de Abelhas
+            foreach(var beeCount in data.beeCounts) { beeManager.SetCurrentCount(beeCount.beeType, beeCount.currentCount); }
+            // 3. Níveis de Upgrade de Abelhas
+            upgrades.LoadAllUpgradeLevels(data.beeUpgradeLevels);
+            // 4. Tutoriais
+            tutorialManager.LoadCompletedTutorials(data.completedTutorialIDs);
+            // 5. Marcos (Removido)
+            // 6. Estado das Conquistas
+            achievementManager.LoadAchievementStatus(data.achievementStatus);
+            // 7. Níveis de Upgrades de Geleia Real
+            royalJellyShopManager.LoadUpgradeLevels(data.royalJellyUpgradeLevels);
             
-            // --- 4. APLICAR TUTORIAIS COMPLETOS ---
-            if (_tutorialManager != null)
-            {
-                _tutorialManager.LoadCompletedTutorials(data.completedTutorialIDs);
-            }
-            
-            Debug.Log("Carregamento de dados concluído. Recriando abelhas na cena...");
-            if (_beeManager != null) _beeManager.RespawnBeesFromSaveData();
+            Debug.Log("Carregamento de dados concluído. Recriando abelhas...");
+            beeManager.RespawnBeesFromSaveData();
         }
         else
         {
-            // Nenhum dado salvo, configura um novo jogo.
             SetupNewGame();
         }
     }
 
     private void SetupNewGame()
     {
-        Debug.Log("Nenhum dado salvo encontrado. Configurando um novo jogo com estado inicial.");
+        Debug.Log("Configurando novo jogo...");
+        // Busca as instâncias novamente aqui para garantir que temos as referências
+        GerenciadorRecursos recursos = GerenciadorRecursos.Instancia;
+        BeeManager beeManager = BeeManager.Instancia;
+        GerenciadorUpgrades upgrades = GerenciadorUpgrades.Instancia;
+        TutorialManager tutorialManager = TutorialManager.Instancia;
+        AchievementManager achievementManager = AchievementManager.Instancia;
+        RoyalJellyShopManager royalJellyShopManager = RoyalJellyShopManager.Instancia;
+        
+        // Aplica resets apenas se as instâncias existirem
+        recursos?.ResetRecursos();
+        upgrades?.ResetAllUpgradeData();
+        tutorialManager?.LoadCompletedTutorials(new List<string>());
+        achievementManager?.LoadAchievementStatus(new List<AchievementSaveData>());
+        royalJellyShopManager?.LoadUpgradeLevels(new List<RoyalJellyUpgradeSaveData>());
+        PlayerPrefs.DeleteKey("QueenPurchased");
 
-        // Reseta os sistemas para um estado limpo
-        if (_recursos != null) _recursos.ResetRecursos();
-        if (_upgrades != null) _upgrades.ResetAllUpgradeData();
-        if (_tutorialManager != null) _tutorialManager.LoadCompletedTutorials(new List<string>()); // Reseta para uma lista vazia
-        
-        // Define a contagem inicial de abelhas
-        if (_beeManager != null)
+        if (beeManager != null)
         {
-            _beeManager.SetCurrentCount("WorkerBee", 1);
-            _beeManager.SetCurrentCount("ProducerBee", 1);
-            var queenData = _beeManager.beeTypes.Find(b => b.beeType == "QueenBee");
-            if (queenData != null) _beeManager.SetCurrentCount("QueenBee", 0);
-        
-            // Cria as abelhas iniciais na cena
-            _beeManager.RespawnBeesFromSaveData();
+            beeManager.SetCurrentCount("WorkerBee", 1);
+            beeManager.SetCurrentCount("ProducerBee", 1);
+            beeManager.SetCurrentCount("GuardBee", 0);
+            var queenData = beeManager.beeTypes.Find(b => b.beeType == "QueenBee");
+            if (queenData != null) beeManager.SetCurrentCount("QueenBee", 0);
+            
+            beeManager.RespawnBeesFromSaveData();
         }
     }
 
-    private bool AreManagersReady()
-    {
-        // Verifica se os singletons essenciais foram inicializados.
-        return _recursos != null && _beeManager != null && _upgrades != null && _tutorialManager != null;
-    }
+    // O método AreManagersReady() não é mais estritamente necessário
+    // pois verificamos os managers dentro de Save/Load agora.
+    // Pode ser removido ou mantido para outras checagens se desejar.
 }
