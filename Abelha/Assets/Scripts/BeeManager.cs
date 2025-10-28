@@ -159,6 +159,34 @@ public class BeeManager : MonoBehaviour
             PlayerPrefs.Save(); // Força o salvamento imediato no disco.
             Debug.Log("FLAG SALVA: O status da Abelha Europa foi salvo como 1.");
         }
+
+
+        if (data.beeType == "AsiaticaBee")
+        {
+            // PlayerPrefs salva um par de "chave" e "valor" no dispositivo.
+            // A chave é "QueenPurchased", o valor é 1.
+            PlayerPrefs.SetInt("AsianPurchased", 1);
+            PlayerPrefs.Save(); // Força o salvamento imediato no disco.
+            Debug.Log("FLAG SALVA: O status da Abelha Europa foi salvo como 1.");
+        }
+
+        if (data.beeType == "JandairaBee")
+        {
+            // PlayerPrefs salva um par de "chave" e "valor" no dispositivo.
+            // A chave é "QueenPurchased", o valor é 1.
+            PlayerPrefs.SetInt("JandairaPurchased", 1);
+            PlayerPrefs.Save(); // Força o salvamento imediato no disco.
+            Debug.Log("FLAG SALVA: O status da Abelha Jandaira foi salvo como 1.");
+        }
+
+        if (data.beeType == "BoraBee")
+        {
+            // PlayerPrefs salva um par de "chave" e "valor" no dispositivo.
+            // A chave é "QueenPurchased", o valor é 1.
+            PlayerPrefs.SetInt("BoraPurchased", 1);
+            PlayerPrefs.Save(); // Força o salvamento imediato no disco.
+            Debug.Log("FLAG SALVA: O status da Abelha Bora foi salvo como 1.");
+        }
         // Anuncia a mudança na contagem para o sistema de achievements, etc.
 
         return true;

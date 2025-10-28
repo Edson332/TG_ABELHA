@@ -144,7 +144,7 @@ public void SaveGameData()
         upgrades?.ResetAllUpgradeData();
         tutorialManager?.LoadCompletedTutorials(new List<string>());
         achievementManager?.LoadAchievementStatus(new List<AchievementSaveData>());
-        royalJellyShopManager?.LoadUpgradeLevels(new List<RoyalJellyUpgradeSaveData>());
+        //royalJellyShopManager?.LoadUpgradeLevels(new List<RoyalJellyUpgradeSaveData>());
         PlayerPrefs.DeleteKey("QueenPurchased");
 
         if (beeManager != null)

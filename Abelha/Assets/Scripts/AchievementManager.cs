@@ -113,6 +113,9 @@ public void UnlockAchievement(int index)
         int statusDaRainha = PlayerPrefs.GetInt("QueenPurchased", 0);
         int statusDaGuarda = PlayerPrefs.GetInt("GuardPurchased", 0);
         int statusDaEuropa = PlayerPrefs.GetInt("EuropaPurchased", 0);
+        int statusDaAsiatica = PlayerPrefs.GetInt("AsianPurchased", 0);
+        int statusDaJandaira = PlayerPrefs.GetInt("JandairaPurchased", 0);
+        int statusDaBora = PlayerPrefs.GetInt("BoraPurchased", 0);
 
         // Exemplo: se houver pelo menos 2 unidades de Mel Processado, desbloqueia o achievement de índice 1.
         if (GerenciadorRecursos.Instancia.ObterRecurso(TipoRecurso.Mel) >= 2)
@@ -151,10 +154,27 @@ public void UnlockAchievement(int index)
             UnlockAchievement(6);
         }
 
-        if (statusDaGuarda == 1)
+        if (statusDaEuropa == 1)
         {
             UnlockAchievement(7);
         }
+
+        if (statusDaAsiatica == 1)
+        {
+            UnlockAchievement(8);
+        }
+
+        if (statusDaJandaira == 1)
+        {
+            UnlockAchievement(9);
+        }
+
+
+        if (statusDaBora == 1)
+        {
+            UnlockAchievement(10);
+        }
+        
 
 
     }
